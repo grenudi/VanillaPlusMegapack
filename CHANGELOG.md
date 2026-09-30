@@ -5,6 +5,47 @@
 - Faster build: the option-selection checks replay every selection of at most two options, every selection missing at most two and 256 seeded random selections (564 of 131,072) instead of every one, and the bundled mods' own test suites run in parallel. Each package builds in about 15 seconds instead of over 4 minutes.
 - The other sixteen bundled mods are unchanged from v34.
 
+## [35.1.0](https://github.com/grenudi/VanillaPlusMegapack/compare/v35.0.0...v35.1.0) (2026-09-30)
+
+
+### Features
+
+* add Armory Preview Cache option ([115a1e9](https://github.com/grenudi/VanillaPlusMegapack/commit/115a1e9ded56aea9a664e8443a378e78a5a321a6))
+* add bundled Clickable Scrollbars v2.1 ([a1a9d9a](https://github.com/grenudi/VanillaPlusMegapack/commit/a1a9d9a974b6f866e8e771f3b054802b4d17ddcf))
+* add controllable hover pack to bundle ([c6ee843](https://github.com/grenudi/VanillaPlusMegapack/commit/c6ee843d0cc135676611cdc0e789aa4ad2b8c5be))
+* add individual megapack mod options ([1adf073](https://github.com/grenudi/VanillaPlusMegapack/commit/1adf073101a451e3caebfb87ca45189ffdc3e4bf))
+* add rows alternative to v8 ([df5b0ce](https://github.com/grenudi/VanillaPlusMegapack/commit/df5b0cede1ebcf7ca49425dd11a8f0f2c255ef7e))
+* adopt loader addon discovery ([2600dce](https://github.com/grenudi/VanillaPlusMegapack/commit/2600dcee0456f99997e4a981a086f60b6500f21a))
+* bundle Arc Thrower Revamped as the twelfth option (v15) ([dced7da](https://github.com/grenudi/VanillaPlusMegapack/commit/dced7da8bed31a0847b3de8005ceb1369f6e6571))
+* bundle Better Lobby Management v1.0 in Megapack v35 ([1b943e6](https://github.com/grenudi/VanillaPlusMegapack/commit/1b943e61d2436f204fb5d8740a6082f44a780e42))
+* bundle Flame Damage Fixed v1.1 in Megapack v34 ([45fe820](https://github.com/grenudi/VanillaPlusMegapack/commit/45fe8200e4ddd1ea4c26562d99d9c0e1434bdde3))
+* bundle Flame Damage Fixed, Mod Options Menu and Mod Bindings Menu in Megapack v33 ([7ca9184](https://github.com/grenudi/VanillaPlusMegapack/commit/7ca91842b707af912d2cfd3ed4430da0c9a30e0b))
+* bundle Know Your Constellation ([b7b899e](https://github.com/grenudi/VanillaPlusMegapack/commit/b7b899ec8b5d610e9041580b8fab0344111d49ac))
+* bundle Ship Station Hotkeys v1.7 in Megapack v29 ([4f5f0d7](https://github.com/grenudi/VanillaPlusMegapack/commit/4f5f0d7cfff663a8e614d23f16a7852f3b5e70e9))
+* publish seven-mod vanilla megapack ([f67cb46](https://github.com/grenudi/VanillaPlusMegapack/commit/f67cb469145f272228ae223b102c42f2a3dac894))
+* release updated standard and Rows packs ([66b6c1a](https://github.com/grenudi/VanillaPlusMegapack/commit/66b6c1aadda43ebb13d2fd390c8287a87181001f))
+* update bundled Armory Preview Cache to v18 ([74ae9db](https://github.com/grenudi/VanillaPlusMegapack/commit/74ae9dbacc56cea1b7548bf99c412b90b68e6268))
+* update bundled Clickable Scrollbars to v2.2 ([2f0dd90](https://github.com/grenudi/VanillaPlusMegapack/commit/2f0dd90ee07555a5355195ec94d74af531c8c267))
+
+
+### Bug Fixes
+
+* bundle Arc Thrower startup fix in v17 ([d525e15](https://github.com/grenudi/VanillaPlusMegapack/commit/d525e15afda2b87bcf09470a1edb3b02182babae))
+* bundle verified scrollbars in v16 ([2506b4f](https://github.com/grenudi/VanillaPlusMegapack/commit/2506b4f372da4d2222741a00c78b25e960d5a91e))
+* **ci:** correct Windows MSVC setup, unused import, and luacheck strictness ([9f22a89](https://github.com/grenudi/VanillaPlusMegapack/commit/9f22a893bfc537fd1781193cab8905e8ed245049))
+* **ci:** stop luacheck's warnings-only exit code from aborting the step early ([4086488](https://github.com/grenudi/VanillaPlusMegapack/commit/4086488484c1b224b5825b5e7062980dea5f33e3))
+* support game build 25327279 ([90e216d](https://github.com/grenudi/VanillaPlusMegapack/commit/90e216dda4c01b14cc9c465672a7d10a251a675a))
+* support game build 25480438 ([27c2a65](https://github.com/grenudi/VanillaPlusMegapack/commit/27c2a65000361b91f841a9ee38868cc916f7175a))
+* update bundled mission fixes and logs ([beaac9d](https://github.com/grenudi/VanillaPlusMegapack/commit/beaac9da37962012154a0f380bcf3e711e86313d))
+
+
+### Performance Improvements
+
+* bundle Shallow Water Diving v3.8 in Megapack v32 ([f689cb3](https://github.com/grenudi/VanillaPlusMegapack/commit/f689cb32895b53b1fe785d34309da1c9df5103e8))
+* bundle the reduced-overhead component releases in v30 ([d370ad4](https://github.com/grenudi/VanillaPlusMegapack/commit/d370ad44222871eb82317e02e4acb885199f08bb))
+* require loader v18 for the shared LuaJIT code cache ([ea92513](https://github.com/grenudi/VanillaPlusMegapack/commit/ea92513180a9e944fdc7909608cc8fc3bae95f67))
+* update bundled performance fixes ([f3868a4](https://github.com/grenudi/VanillaPlusMegapack/commit/f3868a42f4482de7316eb653e8934dcbbc7587f3))
+
 ## v34
 
 - [Flame Damage Fixed](https://github.com/CowboyBingus/FlameDamageFixed) v1.1 fixes v1.0's flame passing through armoured targets. v1.0 kept the flame off the Lumberer by moving it to a copy of its collision layer without layer 20, which is also the game's heavy-armour and vehicle layer: Chargers, the Factory Strider, tank turrets, the Illuminate dropship and more could not be hit. Now each Lumberer or Flame Sentry shares a private Havok collision group with its own flame, from its first burst until it is gone, and members of that group skip each other; no collision layer is changed, so everything else collides with the flame as in the base game. In recorded play the flame landed 4,822 hits on layer-20 hit-boxes (acid Chargers, Chargers, Impalers) and none on the Lumberer that fired it while the fix was running.
