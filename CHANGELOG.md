@@ -191,3 +191,13 @@
 - Updates both the standard and Rows packages; independent mod options are preserved.
 - Moves logs to `%LOCALAPPDATA%\CowboyBingus\Helldivers2\Logs`.
 - Requires Bingus Shared Loader v14 for the shared log folder.
+
+<!-- ai-audit:start -->
+## AI Audit
+### Security / malware-pattern review
+Dry run - no diff was actually sent to a model. Nothing to report.
+
+### Code quality
+Dry run - no diff was actually sent to a model. Nothing to report.
+<!-- ai-audit:end -->
+
