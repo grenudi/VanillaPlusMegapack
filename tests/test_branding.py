@@ -39,13 +39,15 @@ class Validation(unittest.TestCase):
         for bad in ({'name': "It's"}, {'name': 'a"b'}, {'name': 'a\\b'}, {'name': 'a\nb'}, {'name': ''},
                     {'name': ' padded '}, {'name': 'x' * 65}, {'artifact_stem': 'has space'},
                     {'artifact_stem': 'paren(s)'}, {'artifact_stem': '.hidden'}, {'artifact_stem': 'a/b'},
-                    {'short_name': 'x' * 17}):
+                    {'short_name': 'x' * 17}, {'icon': '../outside.png'}, {'icon': 'assets/../x.png'},
+                    {'icon': '/abs/x.png'}, {'icon': 'assets/x.jpg'}, {'icon': 'other/x.png'}, {'icon': 5}):
             with self.assertRaises(ValueError, msg=bad):
                 branding.validate({**brand('Name', 'Stem'), **bad})
 
     def test_accepts_ordinary_values(self):
         branding.validate(brand('Make Helldivers Great Again (MHGA)', 'MHGA'))
         branding.validate(brand('Another Name: Part 2', 'Another-Name_2.0'))
+        branding.validate({**brand('A', 'A'), 'icon': 'assets/mhga/thumbnail.png'})
 
 
 class IdentityModule(unittest.TestCase):
@@ -143,6 +145,25 @@ class PackagingIndependence(unittest.TestCase):
                                      {k: v for k, v in p2[key].items() if k in functional})
                 else:
                     self.assertEqual(p1.get(key), p2.get(key), key)
+
+    def test_custom_icon_is_packaged_as_thumbnail(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, build = Path(tmp) / 'r', Path(tmp) / 'b'
+            (root / 'build').mkdir(parents=True)
+            (root / 'assets/mhga').mkdir(parents=True)
+            build.mkdir()
+            (root / 'INSTALL.txt').write_bytes(b'x')
+            (root / 'build/p.bin').write_bytes(b'abc')
+            (root / 'assets/mhga/icon.png').write_bytes(b'\x89PNG-icon-bytes')
+            report = {
+                'name': 'N', 'artifact_stem': 'N', 'icon': 'assets/mhga/icon.png', 'revision': 'megapack-v1',
+                'version': '1', 'guid': GUID, 'description': 'd', 'game_exe_sha256': '0', 'game_dll_sha256': '0',
+                'deployment_files': {'options/A/p.bin': 'build/p.bin'},
+                'files': {'build/p.bin': __import__('hashlib').sha256(b'abc').hexdigest().upper()},
+                'options': [{'Name': 'A', 'Description': 'd', 'Include': ['options/A']}]}
+            package = zipfile.ZipFile(package_release(root, build, report))
+            self.assertEqual(package.read('thumbnail.png'), b'\x89PNG-icon-bytes')
+            self.assertEqual(json.loads(package.read('manifest.json'))['IconPath'], 'thumbnail.png')
 
 
 class RebrandScope(unittest.TestCase):
