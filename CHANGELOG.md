@@ -136,6 +136,74 @@
 - Measured in live play with all 17 options: the updated mods cost the same as their previous versions (Know Your Constellation about 0.05 ms per frame while its forecast is shown).
 - The other eleven mods are unchanged from v35.
 
+## [35.1.0](https://github.com/grenudi/VanillaPlusMegapack/compare/v35.0.0...v35.1.0) (2026-10-22)
+
+
+### Features
+
+* add Armory Preview Cache option ([115a1e9](https://github.com/grenudi/VanillaPlusMegapack/commit/115a1e9ded56aea9a664e8443a378e78a5a321a6))
+* add bundled Clickable Scrollbars v2.1 ([a1a9d9a](https://github.com/grenudi/VanillaPlusMegapack/commit/a1a9d9a974b6f866e8e771f3b054802b4d17ddcf))
+* add controllable hover pack to bundle ([c6ee843](https://github.com/grenudi/VanillaPlusMegapack/commit/c6ee843d0cc135676611cdc0e789aa4ad2b8c5be))
+* add individual megapack mod options ([1adf073](https://github.com/grenudi/VanillaPlusMegapack/commit/1adf073101a451e3caebfb87ca45189ffdc3e4bf))
+* add Match Your Colors v1.2 to Megapack v38 ([c341ce5](https://github.com/grenudi/VanillaPlusMegapack/commit/c341ce552684839faa2a53f07a418b80054bdf9b))
+* add rows alternative to v8 ([df5b0ce](https://github.com/grenudi/VanillaPlusMegapack/commit/df5b0cede1ebcf7ca49425dd11a8f0f2c255ef7e))
+* adopt loader addon discovery ([2600dce](https://github.com/grenudi/VanillaPlusMegapack/commit/2600dcee0456f99997e4a981a086f60b6500f21a))
+* bundle Arc Thrower Revamped as the twelfth option (v15) ([dced7da](https://github.com/grenudi/VanillaPlusMegapack/commit/dced7da8bed31a0847b3de8005ceb1369f6e6571))
+* bundle Better Lobby Management v1.0 in Megapack v35 ([1b943e6](https://github.com/grenudi/VanillaPlusMegapack/commit/1b943e61d2436f204fb5d8740a6082f44a780e42))
+* bundle Flame Damage Fixed v1.1 in Megapack v34 ([45fe820](https://github.com/grenudi/VanillaPlusMegapack/commit/45fe8200e4ddd1ea4c26562d99d9c0e1434bdde3))
+* bundle Flame Damage Fixed, Mod Options Menu and Mod Bindings Menu in Megapack v33 ([7ca9184](https://github.com/grenudi/VanillaPlusMegapack/commit/7ca91842b707af912d2cfd3ed4430da0c9a30e0b))
+* bundle Hellpod Drop Hold, Laser Sentry Cooldown and Sticky Grenade Handles in Megapack v38 ([60a7c2d](https://github.com/grenudi/VanillaPlusMegapack/commit/60a7c2d4bf1b77e9077276ad91ec63d4f6f0916b))
+* bundle Know Your Constellation ([b7b899e](https://github.com/grenudi/VanillaPlusMegapack/commit/b7b899ec8b5d610e9041580b8fab0344111d49ac))
+* bundle Know Your Constellation v4.0 and the translatable mods in Megapack v36 ([f02069b](https://github.com/grenudi/VanillaPlusMegapack/commit/f02069b13bb85773704664b682717f63d5ff137d))
+* bundle Ship Station Hotkeys v1.7 in Megapack v29 ([4f5f0d7](https://github.com/grenudi/VanillaPlusMegapack/commit/4f5f0d7cfff663a8e614d23f16a7852f3b5e70e9))
+* give each v42 option its own cover ([115f0ab](https://github.com/grenudi/VanillaPlusMegapack/commit/115f0abcf4020c2cf8b8433a4b10c71f7d3c0ac4))
+* include Foliage Pass-Through v1.0 in v42 ([bde9582](https://github.com/grenudi/VanillaPlusMegapack/commit/bde9582723db3d0958c1c1c51fd7d51f8aa32170))
+* include Holster Your Shield v1.0 in v42 ([001d252](https://github.com/grenudi/VanillaPlusMegapack/commit/001d252a3a437727050845f168fe13d8f36c4bb7))
+* include Match Your Colors Hide Cape in v42 ([489f192](https://github.com/grenudi/VanillaPlusMegapack/commit/489f19265e4cea2d0724d1a12e6e87590b03fdb8))
+* include Match Your Colors v1.5 in v42 ([505f8df](https://github.com/grenudi/VanillaPlusMegapack/commit/505f8dfa83c366eed3426e6ca920a49cb25c9b52))
+* include Match Your Colors v1.5 Recolor Weapons in v42 ([c6808ed](https://github.com/grenudi/VanillaPlusMegapack/commit/c6808ed61010aed4057fa746cb0cbb49fd20327f))
+* include Sound Systems Rebalanced v1.0 in v42 ([028429f](https://github.com/grenudi/VanillaPlusMegapack/commit/028429f755215f9e46fc751549c15d5691de1bdd))
+* include Stratagem Hero Expanded v1.0 in v42 ([06768e4](https://github.com/grenudi/VanillaPlusMegapack/commit/06768e433af7e76187fd7463ec2a5d7f6af09c09))
+* include the Match Your Colors squad fixes in v42 ([95dd214](https://github.com/grenudi/VanillaPlusMegapack/commit/95dd214f71cdafb649e94d106e9c14a692fd71b4))
+* Megapack v39 with Laser Sentry Cooldown v1.1 ([a1b8c6d](https://github.com/grenudi/VanillaPlusMegapack/commit/a1b8c6d4d778ef8f29104332db461bc5b84cbb87))
+* Megapack v40 with Match Your Colors v1.3 ([1762b06](https://github.com/grenudi/VanillaPlusMegapack/commit/1762b06e9b1bf1a8592ce5e6a2a97e91cb4e5704))
+* Megapack v41 with Match Your Colors v1.4 ([d11b7b0](https://github.com/grenudi/VanillaPlusMegapack/commit/d11b7b0f3e1c5c04223ee8628072a09658587911))
+* Megapack v42 with Mod Bindings Menu v2.2.1 ([7e4f750](https://github.com/grenudi/VanillaPlusMegapack/commit/7e4f750ea64299bc10a205d7e45ce0da59e3bbf7))
+* publish seven-mod vanilla megapack ([f67cb46](https://github.com/grenudi/VanillaPlusMegapack/commit/f67cb469145f272228ae223b102c42f2a3dac894))
+* release updated standard and Rows packs ([66b6c1a](https://github.com/grenudi/VanillaPlusMegapack/commit/66b6c1aadda43ebb13d2fd390c8287a87181001f))
+* release Vanilla Plus Megapack v37 ([beb54d6](https://github.com/grenudi/VanillaPlusMegapack/commit/beb54d6069b5b684f8c2f17da958760341959907))
+* update Arc Thrower Revamped to v1.7.1 and Clickable Scrollbars to v2.15.1 in v42 ([da110a8](https://github.com/grenudi/VanillaPlusMegapack/commit/da110a81bf6ac60ba74f04a3c71a2ab5e8cfccfd))
+* update bundled Armory Preview Cache to v18 ([74ae9db](https://github.com/grenudi/VanillaPlusMegapack/commit/74ae9dbacc56cea1b7548bf99c412b90b68e6268))
+* update bundled Clickable Scrollbars to v2.2 ([2f0dd90](https://github.com/grenudi/VanillaPlusMegapack/commit/2f0dd90ee07555a5355195ec94d74af531c8c267))
+* update Mod Bindings Menu in v42 (no input override, no protection changes) ([40bcabe](https://github.com/grenudi/VanillaPlusMegapack/commit/40bcabec6d1767b553ce9bd6143f50b19c8ba548))
+* update Mod Bindings Menu to v2.3 in v42 ([8afcb72](https://github.com/grenudi/VanillaPlusMegapack/commit/8afcb725b9320b344ef209172b1d7633df89f95b))
+* update twenty components to their idle-rework releases in v42 ([4eba9ca](https://github.com/grenudi/VanillaPlusMegapack/commit/4eba9cae42eb26b4281a8ec0a03193e579347b58))
+
+
+### Bug Fixes
+
+* bundle Arc Thrower startup fix in v17 ([d525e15](https://github.com/grenudi/VanillaPlusMegapack/commit/d525e15afda2b87bcf09470a1edb3b02182babae))
+* bundle verified scrollbars in v16 ([2506b4f](https://github.com/grenudi/VanillaPlusMegapack/commit/2506b4f372da4d2222741a00c78b25e960d5a91e))
+* **ci:** correct Windows MSVC setup, unused import, and luacheck strictness ([9f22a89](https://github.com/grenudi/VanillaPlusMegapack/commit/9f22a893bfc537fd1781193cab8905e8ed245049))
+* **ci:** fix AI-audit changelog insertion landing at end of file instead of after the current release ([0a5e585](https://github.com/grenudi/VanillaPlusMegapack/commit/0a5e58541e0df217b1c71469863fb6a57338e7c4))
+* **ci:** stop luacheck's warnings-only exit code from aborting the step early ([4086488](https://github.com/grenudi/VanillaPlusMegapack/commit/4086488484c1b224b5825b5e7062980dea5f33e3))
+* include binding reset fix in v42 ([6feb986](https://github.com/grenudi/VanillaPlusMegapack/commit/6feb9862007b4a367b5e607b8f4dc19eb02ee00e))
+* include the Match Your Colors one-color fix in v42 ([ffb4f93](https://github.com/grenudi/VanillaPlusMegapack/commit/ffb4f93a5436244da6401dcab3c52d0c05754fc7))
+* include the Match Your Colors squad-card fix in v42 ([7f995d0](https://github.com/grenudi/VanillaPlusMegapack/commit/7f995d0452e05bd02b039a29610942526831fc28))
+* include the Match Your Colors v1.5 color fixes in v42 ([167b30c](https://github.com/grenudi/VanillaPlusMegapack/commit/167b30c8ebcd6071ff8ae8ff0ee535a9afe93310))
+* support game build 25327279 ([90e216d](https://github.com/grenudi/VanillaPlusMegapack/commit/90e216dda4c01b14cc9c465672a7d10a251a675a))
+* support game build 25480438 ([27c2a65](https://github.com/grenudi/VanillaPlusMegapack/commit/27c2a65000361b91f841a9ee38868cc916f7175a))
+* update bundled mission fixes and logs ([beaac9d](https://github.com/grenudi/VanillaPlusMegapack/commit/beaac9da37962012154a0f380bcf3e711e86313d))
+* update Mod Options Menu to v1.2.1 in v42 ([526750b](https://github.com/grenudi/VanillaPlusMegapack/commit/526750bb7e99dea6a707e5649fda488d91f3be86))
+
+
+### Performance Improvements
+
+* bundle Shallow Water Diving v3.8 in Megapack v32 ([f689cb3](https://github.com/grenudi/VanillaPlusMegapack/commit/f689cb32895b53b1fe785d34309da1c9df5103e8))
+* bundle the reduced-overhead component releases in v30 ([d370ad4](https://github.com/grenudi/VanillaPlusMegapack/commit/d370ad44222871eb82317e02e4acb885199f08bb))
+* require loader v18 for the shared LuaJIT code cache ([ea92513](https://github.com/grenudi/VanillaPlusMegapack/commit/ea92513180a9e944fdc7909608cc8fc3bae95f67))
+* update bundled performance fixes ([f3868a4](https://github.com/grenudi/VanillaPlusMegapack/commit/f3868a42f4482de7316eb653e8934dcbbc7587f3))
+
 ## v35
 
 - New option: [Better Lobby Management](https://github.com/CowboyBingus/BetterLobbyManagement) v1.0, host tools in the escape menu's GAME tab. DISBAND SQUAD kicks every other player back to their own ship. PROMOTE announces the new host with the game's own "*name* is the new squad leader" line, kicks them home with the game's own player-menu KICK, finds their new lobby and moves the whole squad to their ship; only the host needs the mod. It also shortens the Galactic Map lobby scanner's recharge from 20 to 5 seconds (adjustable in Mod Options Menu, never longer than the game's own) and offers an own-continent lobby filter. Measured in recorded play, as separate mods before the merge: 0.003 ms per frame for the lobby tools and 0.001 ms for the scanner.
