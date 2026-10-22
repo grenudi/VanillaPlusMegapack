@@ -2,8 +2,8 @@
 
 A kit is a folder with one subfolder per mod, each holding the mod's en.lua
 (English, the source of every translation) and its translations, <tag>.lua.
-A mod repository (or its locales/ folder) is a kit of one mod. The Vanilla Plus
-Megapack repository's components folder is a kit of every mod it bundles.
+A mod repository (or its locales/ folder) is a kit of one mod. The MHGA
+repository's components folder is a kit of every mod it bundles.
 
   translations.py template <kit> <tag>        create or update <tag>.lua for every mod
   translations.py check <kit> <tag>           report problems (exit 1 on errors)
@@ -198,7 +198,7 @@ def locales_of(folder):
 
 def mod_folders(kit):
     """A kit's mods: kit itself or kit/locales (one mod, e.g. a mod repository), else every
-    subfolder with en.lua or locales/en.lua (a kit, or the Vanilla Plus Megapack's components)."""
+    subfolder with en.lua or locales/en.lua (a kit, or the MHGA pack's components)."""
     kit = Path(kit)
     if not kit.is_dir():
         raise SystemExit(f'{kit}: not a folder')

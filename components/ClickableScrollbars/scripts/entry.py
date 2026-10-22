@@ -1,6 +1,6 @@
 """Clickable Scrollbars' addon entry: every other src/*.lua file as a function of its own, ahead of
 src/clickable_scrollbars.lua, as one plaintext Lua resource with the loader's discovery declaration first.
-Standard library only and no side effects on import, so scripts/build.py and the Vanilla Plus Megapack build
+Standard library only and no side effects on import, so scripts/build.py and the MHGA build
 produce the same bytes. Run directly, it writes the entry the Lua suites load:
 
     python scripts/entry.py [path]    (default build/clickable_scrollbars.lua)

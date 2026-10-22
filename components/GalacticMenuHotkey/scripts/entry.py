@@ -1,7 +1,7 @@
 """Ship Station Hotkeys' addon entry: src/bingus_text.lua and locales/, then Bingus Shared Runtime's vendored
 src/bingus_runtime.lua and src/bingus_memory.lua, ahead of src/galactic_menu_hotkey.lua, as one plaintext Lua
 resource with the loader's discovery declaration first. Standard library only and no side effects on import, so
-scripts/build.py and the Vanilla Plus Megapack build produce the same bytes."""
+scripts/build.py and the MHGA build produce the same bytes."""
 from pathlib import Path
 
 NAME = 'mods/cowboybingus/galactic_menu_hotkey'
