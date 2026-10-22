@@ -61,6 +61,9 @@ def main():
         rel = rels[0] if rels else None
         rdate = parse(rel["published_at"]) if rel else None
         rows.append((rdate, parse(r["pushed_at"]), r, rel, mirrors))
+    if not rows:  # API unreachable/rate-limited: keep the existing table instead of writing an empty one
+        print("no repository data; README left unchanged")
+        return 0
     floor = datetime.min.replace(tzinfo=timezone.utc)
     rows.sort(key=lambda t: (t[0] or floor, t[1] or floor), reverse=True)
 

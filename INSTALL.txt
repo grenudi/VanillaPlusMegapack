@@ -1,4 +1,4 @@
-Vanilla Plus Megapack - v42
+Make Helldivers Great Again (MHGA) - v42
 
 Supports Steam build 25480438 / EXE 1.8.46015.0.
 Requires the separate Bingus Shared Loader v18 / API 1.

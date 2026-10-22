@@ -69,7 +69,7 @@ translate several mods at once, collect their `locales/` folders into one kit:
 python scripts/translations.py kit my-kit <repo>/locales <other repo>/locales
 ```
 
-The Vanilla Plus Megapack repository has the same tool, and its `components` folder is already a
+The MHGA repository has the same tool, and its `components` folder is already a
 kit of every mod above: run the commands below in it with `components` as the kit. A pack built
 there covers all seven mods, standalone or in the Megapack.
 
