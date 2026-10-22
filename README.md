@@ -2,59 +2,70 @@
 
 # Vanilla Plus Megapack
 
-Choose which of the seventeen bundled CowboyBingus Helldivers 2 mods to enable in one install. The pack includes gameplay repairs, Ship Station Hotkeys, Clickable Scrollbars, Better Lobby Management's host tools, and the Mod Options Menu and Mod Bindings Menu tabs.
+Choose which of the twenty-five bundled CowboyBingus Helldivers 2 mods to enable in one install. The pack includes gameplay repairs, Ship Station Hotkeys, Clickable Scrollbars, Better Lobby Management's host tools, and the Mod Options Menu and Mod Bindings Menu tabs.
 
-**Requires the separately built Bingus Shared Loader v18.** Install two ZIPs: `Vanilla-Plus-Megapack-v35.zip` and `Bingus-Shared-Loader-v18.zip`. Mod managers do not install the dependency automatically.
+**Requires the separately built Bingus Shared Loader v18 or newer (v19 is current).** Install two ZIPs: `Vanilla-Plus-Megapack-v42.zip` and `Bingus-Shared-Loader-v19.zip`. Mod managers do not install the dependency automatically.
 
-
-The release also provides an optional [Rows package](docs/ROWS.md), `Vanilla-Plus-Megapack-Rows-v35.zip`. It displays every constellation section at once with the same native styling. Enable either the standard pack or Rows with the shared loader. All other bundled resources are identical.
+The Rows package ended with v35: Know Your Constellation v4 has a single layout. If you used `Vanilla-Plus-Megapack-Rows`, disable it and enable this pack.
 
 ## Install with Arsenal or HD2MM
 
 1. Close Helldivers 2. Use one mod manager.
 2. Replace any previous loader entry with v18. Disable old megapacks and standalone copies of features you want turned off.
-3. Import `Vanilla-Plus-Megapack-v35.zip` and `Bingus-Shared-Loader-v18.zip`, then enable both.
+3. Import `Vanilla-Plus-Megapack-v42.zip` and `Bingus-Shared-Loader-v19.zip`, then enable both.
 4. With Arsenal's default priority, put **Bingus Shared Loader last**, at the bottom. If first-mod priority is enabled, put the loader first.
 5. Open the Megapack's **Options** (sliders button) in Arsenal, or its mod options in HD2MM. Check each mod you want and uncheck each mod you do not want. Confirm/save the selection.
 6. **Purge / Deploy**, then launch the game normally. Close the game and repeat these steps whenever you change options.
 
-Each of the seventeen options is independent. Select all for the complete pack, any subset for a custom pack, or none to deploy no features from the pack. Enable Mod Bindings Menu with Ship Station Hotkeys to rebind its six shortcuts, including controller buttons. Enable Mod Options Menu to set Shallow Water Diving's maximum dive depth. The option was named Galactic Menu Hotkey before v29; confirm it is still checked after updating. Review your choices after importing or updating: initial selections depend on the manager's settings. Both standard and Rows ZIPs offer the same seventeen toggles; Rows changes the Know Your Constellation layout.
+Each of the twenty-five options is independent. Select all for the complete pack, any subset for a custom pack, or none to deploy no features from the pack. Enable Mod Bindings Menu with Ship Station Hotkeys to rebind its six shortcuts, including controller buttons. Enable Mod Options Menu to set Shallow Water Diving's maximum dive depth. The option was named Galactic Menu Hotkey before v29; confirm it is still checked after updating. Review your choices after importing or updating: initial selections depend on the manager's settings.
 
 An unchecked option removes only the pack's copy. An enabled standalone package or another megapack can still activate that feature, so disable those copies as well. Overlapping gameplay entries run once and their callbacks do not stack. If versions differ, manager priority selects the winner.
 
 ## Shared LuaJIT code cache
 
-The game runs every Lua mod in its own LuaJIT, whose code cache keeps its 2015 limits (512 KB of machine code, 1,000 traces) for the game and all mods together. When it fills, LuaJIT discards all compiled code and recompiles it during play. Bingus Shared Loader v18, required by this pack, raises and manages these limits. If an older loader is still installed, this pack raises them once at startup to the same starting values (16 MB, 8,000 traces), with no per-frame work and without the loader's growth or log line.
+The game runs every Lua mod in its own LuaJIT, whose code cache keeps its 2015 limits (512 KB of machine code, 1,000 traces) for the game and all mods together. When it fills, LuaJIT discards all compiled code and recompiles it during play. Bingus Shared Loader v18, required by this pack, raises and manages these limits. If an older loader is still installed, this pack raises them once at startup to the same starting values (64 MB, 8,000 traces), with no per-frame work and without the loader's growth or log line.
 
-## Included in v35
+## Included in v42
 
 | Mod | Version | Effect |
 | --- | --- | --- |
-| [Better Stratagem Bounce](https://github.com/CowboyBingus/BetterStratagemBounce) | v15.3 | Allows stratagem balls to stick on more usable surfaces. |
-| [Hellpod Steering Unlocked](https://github.com/CowboyBingus/HellpodSteeringUnlocked) | v7.4 | Removes the hellpod steering restriction near high ground. |
-| [Reinforcement Beacons Fixed](https://github.com/CowboyBingus/ReinforcementBeaconsFixed) | v4.5 | Centers queued reinforcements over their beacon or solo anchor. |
-| [Consistent Vaulting](https://github.com/CowboyBingus/ConsistentVaulting) | v8.8 | Adds fresh obstacle checks, higher ledge detection and bounded steep-surface support. |
-| [Shallow Water Diving](https://github.com/CowboyBingus/ShallowWaterDiving) | v3.8 | Preserves the standing water reference during a local airborne dive; the depth limit is adjustable in Mod Options Menu. |
-| [Sentry Aim Retention](https://github.com/CowboyBingus/SentryAimRetention) | v1.0.13 | Retains sentry aim, improves nearby target handoffs, and pauses broad sweeps, stale-target shots and terrain-obstructed fire. |
-| [Enemy Collision Synchronized](https://github.com/CowboyBingus/EnemyCollisionSynchronized) | v2.11.0 | Aligns displaced corpse collision and curbs renewed movement after large remote corpses settle. |
-| [Controllable Hover Pack](https://github.com/CowboyBingus/ControllableHoverPack) | v1.7 | Press the Jump Pack action again to descend early while retaining native landing assistance. |
-| [Know Your Constellation](https://github.com/CowboyBingus/KnowYourConstellation) | v3.16 | Shows local enemy forecasts on mission previews and briefing before choosing a loadout. |
-| [Armory Preview Cache](https://github.com/CowboyBingus/ArmoryPreviewCache) | v22 | Caches equipment thumbnails and preloads their assets in Armory and mission briefing. |
-| [Arc Thrower Revamped](https://github.com/CowboyBingus/ArcThrowerRevamped) | v1.6 | Hold the fire button to keep the Arc Thrower firing; stock charge, damage and arc settings. |
-| [Clickable Scrollbars](https://github.com/CowboyBingus/ClickableScrollbars) | v2.14 | Drag equipment, Career, bindings and settings scrollbars. |
-| [Ship Station Hotkeys](https://github.com/CowboyBingus/ShipStationHotkeys) | v1.7 | Shortcuts aboard the ship: Tab map, F1 Armory, F5 Control Center, F6 Ship Management, F7 Stratagem Hero, F8 instant Hellpod entry. |
-| [Flame Damage Fixed](https://github.com/CowboyBingus/FlameDamageFixed) | v1.1 | Fixes the Lumberer's and Flame Sentry's flame: two flame parts spawn again, the flame starts at the Cremator's distances and no longer hits the weapon that fires it, while still hitting Chargers and every other target. |
-| [Mod Options Menu](https://github.com/CowboyBingus/ModOptionsMenu) | v1.0.1 | Native MODS tab on the Options screen, where mods such as Shallow Water Diving offer their settings. |
-| [Mod Bindings Menu](https://github.com/CowboyBingus/ModBindingsMenu) | v2.0 | Native MODS tab on the keyboard and controller binding pages, where mods such as Ship Station Hotkeys offer rebindable keys. |
-| [Better Lobby Management](https://github.com/CowboyBingus/BetterLobbyManagement) | v1.0 | Host tools in the escape menu: DISBAND SQUAD, and PROMOTE, which moves the whole squad to the new host's ship (only the host needs the mod); a 5-second Galactic Map lobby scanner and an own-continent lobby filter. |
+| [Better Stratagem Bounce](https://github.com/CowboyBingus/BetterStratagemBounce) | v15.4.1 | Allows stratagem balls to stick on more usable surfaces. |
+| [Hellpod Steering Unlocked](https://github.com/CowboyBingus/HellpodSteeringUnlocked) | v7.5.1 | Removes the hellpod steering restriction near high ground. |
+| [Reinforcement Beacons Fixed](https://github.com/CowboyBingus/ReinforcementBeaconsFixed) | v4.6.1 | Centers queued reinforcements over their beacon or solo anchor. |
+| [Consistent Vaulting](https://github.com/CowboyBingus/ConsistentVaulting) | v8.9.1 | Adds fresh obstacle checks, higher ledge detection and bounded steep-surface support. |
+| [Shallow Water Diving](https://github.com/CowboyBingus/ShallowWaterDiving) | v3.10.1 | Preserves the standing water reference during a local airborne dive; the depth limit is adjustable in Mod Options Menu. |
+| [Sentry Aim Retention](https://github.com/CowboyBingus/SentryAimRetention) | v1.1.1 | Retains sentry aim, improves nearby target handoffs, and pauses broad sweeps, stale-target shots and terrain-obstructed fire. |
+| [Enemy Collision Synchronized](https://github.com/CowboyBingus/EnemyCollisionSynchronized) | v2.13.0 | Aligns displaced corpse collision and curbs renewed movement after large remote corpses settle. |
+| [Controllable Hover Pack](https://github.com/CowboyBingus/ControllableHoverPack) | v1.8.1 | Press the Jump Pack action again to descend early while retaining native landing assistance. |
+| [Know Your Constellation](https://github.com/CowboyBingus/KnowYourConstellation) | v4.1.1 | Shows every enemy a mission can spawn, named as on the Helldivers wiki and weighted by how often it spawns, on the war table and the briefing screen. |
+| [Armory Preview Cache](https://github.com/CowboyBingus/ArmoryPreviewCache) | v23.1 | Caches equipment thumbnails and preloads their assets in Armory and mission briefing. |
+| [Arc Thrower Revamped](https://github.com/CowboyBingus/ArcThrowerRevamped) | v1.7.1 | Hold the fire button to keep the Arc Thrower firing; stock charge, damage and arc settings. |
+| [Clickable Scrollbars](https://github.com/CowboyBingus/ClickableScrollbars) | v2.15.1 | Drag equipment, Career, bindings and settings scrollbars. |
+| [Ship Station Hotkeys](https://github.com/CowboyBingus/ShipStationHotkeys) | v1.9.1 | Shortcuts aboard the ship: Tab map, F1 Armory, F5 Control Center, F6 Ship Management, F7 Stratagem Hero, F8 instant Hellpod entry. |
+| [Flame Damage Fixed](https://github.com/CowboyBingus/FlameDamageFixed) | v1.2 | Fixes the Lumberer's and Flame Sentry's flame: two flame parts spawn again, the flame starts at the Cremator's distances and no longer hits the weapon that fires it, while still hitting Chargers and every other target. |
+| [Mod Options Menu](https://github.com/CowboyBingus/ModOptionsMenu) | v1.2.1 | Native MODS tab on the Options screen, where mods such as Shallow Water Diving offer their settings. |
+| [Mod Bindings Menu](https://github.com/CowboyBingus/ModBindingsMenu) | v2.3 | Native MODS tab on the keyboard and controller binding pages, where mods such as Ship Station Hotkeys offer rebindable keys. |
+| [Better Lobby Management](https://github.com/CowboyBingus/BetterLobbyManagement) | v1.2.1 | Host tools in the escape menu: DISBAND SQUAD, PROMOTE, which moves the whole squad to the new host's ship, and CANCEL SOS in a mission (only the host needs the mod); a 5-second Galactic Map lobby scanner and an own-continent lobby filter. |
+| [Hellpod Drop Hold](https://github.com/CowboyBingus/HellpodDropHold) | v1.2.1 | Holds your own hellpod in the sky while your loading screen or the join cutscene is up, as when you join a mission in progress, then lets it fall as a normal drop with steering near the ground. |
+| [Laser Sentry Cooldown](https://github.com/CowboyBingus/LaserSentryCooldown) | v1.1.1 | At max heat the Laser Sentry overheats and stops firing as usual, then cools at its own normal rate (about 50 s), powers its turret up and fires again instead of exploding. No options. |
+| [Match Your Colors](https://github.com/CowboyBingus/MatchYourColors) | v1.5 | Your helmet takes your armor's colors, or your armor takes your helmet's, or both take your cape's or one of the game's weapon paint schemes; your cape can follow (Mod Options Menu). Squadmates who use the mod see your colors too. |
+| [Sticky Grenade Handles](https://github.com/CowboyBingus/StickyGrenadeHandles) | v1.0.1 | The G-123 Thermite and the sticky stun grenade stick when their handle hits first, instead of bouncing off. |
+| [Stratagem Hero Expanded](https://github.com/CowboyBingus/StratagemHeroExpanded) | v1.0 | The ship's Stratagem Hero arcade draws from all 96 loadout stratagems and 12 common mission stratagems (108) instead of its 27 launch-era ones; themed rounds stay. |
+| [Sound Systems Rebalanced](https://github.com/CowboyBingus/SoundSystemsRebalanced) | v1.0 | Mission music plays at the war-table volume in every mission, also when you join one in progress, and no longer goes silent on swamp, desert, oasis, deciduous and coniferous forest, hive world and active rift planets. |
+| [Foliage Pass-Through](https://github.com/CowboyBingus/FoliagePassThrough) | v1.0 | Player rockets, missiles, launcher rounds and stratagem ordnance pass through tree canopies and bushes instead of exploding in them; trunks, the ground and enemies still stop them. |
+| [Holster Your Shield](https://github.com/CowboyBingus/HolsterYourShield) | v1.0 | Press Backpack Function to put the Ballistic Shield or the Directional Shield on your back while you keep a one-handed weapon in hand; press again to take it back. |
 
-All bundled components are pinned to the source and resource hashes in `components.lock.json`. Third-party HUD mods and the reserved, unreleased Wide Angle Stratagems module are not included. Mod Bindings Menu, Mod Options Menu, Flame Damage Fixed and Better Lobby Management are also released on their own: use one copy of each, the standalone package or the pack option. The shared loader remains a separate dependency with its own repository and updates.
+All bundled components are pinned to the source and resource hashes in `components.lock.json`. Third-party HUD mods and the reserved, unreleased Wide Angle Stratagems module are not included. Mod Bindings Menu, Mod Options Menu, Flame Damage Fixed, Better Lobby Management, Hellpod Drop Hold, Laser Sentry Cooldown, Match Your Colors, Sticky Grenade Handles, Stratagem Hero Expanded, Sound Systems Rebalanced, Foliage Pass-Through and Holster Your Shield are also released on their own: use one copy of each, the standalone package or the pack option. The shared loader remains a separate dependency with its own repository and updates.
 
 Supported game: Steam build 25480438 / EXE 1.8.46015.0. Each bundled mod retains its behavior and compatibility checks.
 
+## Translations
+
+Know Your Constellation, Better Lobby Management, Mod Options Menu, Mod Bindings Menu, Ship Station Hotkeys, Shallow Water Diving and Match Your Colors show their texts in the game's Text Language when a translation is installed. Texts without one show in English. To translate them, see [TRANSLATING.md](TRANSLATING.md). This repository's `components` folder is a kit of all seven mods, for example `python scripts/translations.py template components zh-Hans`. A translation pack built with `scripts/translations.py pack` installs like any mod and works with this pack and the standalone mods alike.
+
 ## Compatibility and updates
 
-The pack preserves all public gameplay resource names and embeds the exact pinned bytecode inside plaintext discovery entries. It contains no shared startup loader, `boot` replacement or Wwise callback replacement. The Mod Bindings Menu option is the only one that also replaces a game resource: its `content/input.config` override with the native input actions, byte for byte the standalone release's. Another mod that replaces that resource must be merged with it. Existing HUD+ and supported HUD Ballistic Trajectory Overlay compatibility is handled by Bingus Shared Loader. Give the loader winning priority over the supported overlay as described in its instructions.
+The pack preserves all public gameplay resource names and embeds the exact pinned bytecode inside plaintext discovery entries. It contains no shared startup loader, `boot` replacement or Wwise callback replacement. The Sound Systems Rebalanced option is the only one that also replaces a game resource: its patched `music_init` sound bank, byte for byte the standalone release's. The Mod Bindings Menu option replaces none: its keyboard defaults are added while the game runs. Existing HUD+ and supported HUD Ballistic Trajectory Overlay compatibility is handled by Bingus Shared Loader. Give the loader winning priority over the supported overlay as described in its instructions.
 
 Replace the megapack ZIP to update its bundled gameplay versions. Updating an individual mod repository does not silently change this pinned pack. The loader can be updated separately.
 
@@ -68,4 +79,8 @@ The prior performance improvements remain included: bounded Arc Thrower scanning
 
 Current-build multiplayer checks for the earlier gameplay components remain pending.
 
-Current version: **v35**, for game build **25480438**. See [changes](CHANGELOG.md) and [validation coverage](docs/MIGRATION_VALIDATION.md).
+Current version: **v42**, for game build **25480438**. See [changes](CHANGELOG.md) and [validation coverage](docs/MIGRATION_VALIDATION.md).
+
+## License
+
+Zero-Clause BSD (0BSD): use, copy, modify and distribute for any purpose, with no conditions. See `LICENSE`.

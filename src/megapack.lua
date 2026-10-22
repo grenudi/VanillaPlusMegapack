@@ -6,7 +6,7 @@ assert(type(loader.api) == 'number' and loader.api >= 1, 'Shared loader API 1 is
 assert(type(loader.version) == 'number' and loader.version >= 16, 'Bingus Shared Loader loader-v16 is required')
 local pack = {
     name = 'Vanilla Plus Megapack',
-    revision = 'megapack-v35',
+    revision = 'megapack-v42',
     -- Available component inventory; installed choices are in loader.modules.
     modules = {
         'mods/cowboybingus/better_stratagem_bounce',
@@ -26,6 +26,14 @@ local pack = {
         'mods/cowboybingus/mod_options_menu',
         'mods/cowboybingus/mod_bindings_menu',
         'mods/cowboybingus/better_lobby_management',
+        'mods/cowboybingus/hellpod_drop_hold',
+        'mods/cowboybingus/laser_sentry_cooldown',
+        'mods/cowboybingus/match_your_colors',
+        'mods/cowboybingus/sticky_grenade_handles',
+        'mods/cowboybingus/stratagem_hero_expanded',
+        'mods/cowboybingus/sound_systems_rebalanced',
+        'mods/cowboybingus/foliage_pass_through',
+        'mods/cowboybingus/holster_your_shield',
     },
 }
 loader.megapack = pack
@@ -39,8 +47,8 @@ loader.megapack = pack
 if not (type(loader.jit) == 'table' and loader.jit.managed) then
     local library = rawget(_G, 'jit')
     local opt = type(library) == 'table' and type(library.opt) == 'table' and library.opt.start
-    if type(opt) == 'function' and pcall(opt, 'maxmcode=16384', 'maxtrace=8000') then
-        pack.jit_fallback = 'maxmcode=16384 maxtrace=8000'
+    if type(opt) == 'function' and pcall(opt, 'maxmcode=65536', 'maxtrace=8000') then
+        pack.jit_fallback = 'maxmcode=65536 maxtrace=8000'
     end
 end
 return pack

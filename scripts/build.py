@@ -9,18 +9,16 @@ import sys
 
 sys.dont_write_bytecode = True
 from archive import ARCHIVE, LUA, EXE_SHA, GAME_DLL_SHA, make_archive, resource_hash, sha
-from package import package_release, release_directory
+from package import package_release
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / 'build'
 MODULE = 'mods/cowboybingus/vanilla_plus_megapack'
-VERSION = '35'
+VERSION = '42'
 REVISION = f'megapack-v{VERSION}'
 GUID = '876060ae-0640-4ac5-95b6-ec7c9a0567d3'
-ROWS_GUID = 'fb497df5-080b-48a5-b31d-103ccb060e1c'
-ROWS_REVISION = REVISION + '-rows-v1'
-INPUT_ARCHIVE = ARCHIVE.replace('patch_0', 'patch_1')  # Mod Bindings Menu's input actions, beside its addon
-
+INPUT_ARCHIVE = ARCHIVE.replace('patch_0', 'patch_1')  # an option's second archive, beside its addon
+MUSIC_ARCHIVE = INPUT_ARCHIVE  # Sound Systems Rebalanced's patched music_init, beside its addon in its own option
 OPTION_DESCRIPTIONS = {
     'ArcThrowerRevamped': 'Hold the fire button to keep the Arc Thrower firing.',
     'ArmoryPreviewCache': 'Caches equipment thumbnails and preloads assets in Armory and mission briefing.',
@@ -32,28 +30,40 @@ OPTION_DESCRIPTIONS = {
     'SentryAimRetention': 'Retains sentry aim and improves target handoffs and firing checks.',
     'EnemyCollisionSynchronized': 'Aligns displaced corpse collision and curbs renewed movement after large remote corpses settle.',
     'ControllableHoverPack': 'Press the Jump Pack action again to descend early with native landing assistance.',
-    'KnowYourConstellation': 'Shows local enemy forecasts on mission previews and briefing.',
+    'KnowYourConstellation': 'Shows every enemy a mission can spawn, weighted by how often it spawns, on the war table and the briefing screen.',
     'ClickableScrollbars': 'Smoothly drag equipment and Career scrollbars, even with the pointer away from the track.',
     'GalacticMenuHotkey': 'Ship station shortcuts: Tab map, F1 Armory, F5 Control Center, F6 Ship Management, F7 Stratagem Hero, F8 instant Hellpod entry. Enable Mod Bindings Menu to rebind them.',
     'FlameDamageFixed': 'Fixes the Lumberer\'s and Flame Sentry\'s flame: two flame parts spawn again, it starts at the Cremator\'s distances and no longer hits the weapon that fires it, while still hitting Chargers and every other target.',
     'ModOptionsMenu': 'Adds a native MODS tab to the Options screen, where mods such as Shallow Water Diving offer their settings.',
     'ModBindingsMenu': 'Adds a native MODS tab to the keyboard and controller binding pages, where mods such as Ship Station Hotkeys offer rebindable keys.',
-    'BetterLobbyManagement': 'Host tools in the escape menu: DISBAND SQUAD, and PROMOTE, which moves the whole squad to the new host\'s ship (only the host needs the mod). Also a 5-second Galactic Map lobby scanner and an own-continent lobby filter.',
+    'BetterLobbyManagement': 'Host tools in the escape menu: DISBAND SQUAD, PROMOTE, which moves the whole squad to the new host\'s ship, and CANCEL SOS in a mission (only the host needs the mod). Also a 5-second Galactic Map lobby scanner and an own-continent lobby filter.',
+    'HellpodDropHold': 'Holds your own hellpod in the sky while your loading screen or the join cutscene is up, as when you join a mission in progress, then lets it fall as a normal drop with steering near the ground.',
+    'LaserSentryCooldown': 'At max heat the Laser Sentry overheats and stops firing as usual, then cools at its own normal rate (about 50 s), powers its turret up and fires again instead of exploding. No options.',
+    'MatchYourColors': 'Your helmet takes your armor\'s colors, or your armor takes your helmet\'s, or both take your cape\'s or one of the game\'s weapon paint schemes; your cape can follow (Mod Options Menu). Squadmates who use the mod see your colors too.',
+    'StickyGrenadeHandles': 'The G-123 Thermite and the sticky stun grenade stick when their handle hits first, instead of bouncing off.',
+    'StratagemHeroExpanded': 'The ship\'s Stratagem Hero arcade draws from every loadout stratagem and the common mission stratagems (108) instead of its 27 launch-era ones. Themed rounds stay.',
+    'SoundSystemsRebalanced': 'Mission music plays at the war-table volume in every mission, also when you join one in progress (it was 6 dB louder then), and no longer goes silent on swamp, desert and the other planet types the music had no version for.',
+    'FoliagePassThrough': 'Player rockets, missiles, launcher rounds and stratagem ordnance pass through tree canopies and bushes instead of exploding in them. Trunks, the ground and enemies still stop them; enemy projectiles are unchanged.',
+    'HolsterYourShield': 'Press Backpack Function to put the Ballistic Shield or the Directional Shield on your back while you keep a one-handed weapon in hand; press again to take it back.',
 }
 
 
-def load_components(rows=False):
-    components = json.loads((ROOT / 'components.lock.json').read_text(encoding='utf-8'))
-    if rows:
-        for component in components:
-            if component['slug'] == 'KnowYourConstellation':
-                component.update(component['rows'])
-    return components
+def load_components():
+    return json.loads((ROOT / 'components.lock.json').read_text(encoding='utf-8'))
 
 
-def run(args):
+def load_script(root, relative, name):
+    """A component's own build helper (scripts/entry.py or scripts/module.py), imported under a private name."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(name, root / relative)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def run(args, cwd=None):
     env = dict(os.environ, LUA_PATH=str(LUA.parent / '?.lua') + ';;')
-    result = subprocess.run(list(map(str, args)), capture_output=True, text=True, env=env)
+    result = subprocess.run(list(map(str, args)), capture_output=True, text=True, env=env, cwd=cwd)
     if result.returncode:
         raise RuntimeError(result.stdout + result.stderr)
     return result.stdout
@@ -103,162 +113,155 @@ def discoverable_resource(name, resource, directory):
     return entry
 
 
-def build_component(component, build=BUILD, rows=False):
+# Standalone addons whose scripts/entry.py assembles src/ (and locales/) into one plaintext entry that carries the
+# discovery declaration; the option ships those exact bytes. A component with a 'version' passes it on.
+ASSEMBLED = ('BetterLobbyManagement', 'ModOptionsMenu', 'ModBindingsMenu', 'GalacticMenuHotkey', 'ClickableScrollbars',
+             'ArcThrowerRevamped')
+# Gameplay modules whose scripts/module.py compiles the embedded runtime, adapter, data and loader into the
+# standalone bytecode: build_module(root, build, module, patch, revision), with this build's archive module.
+MODULES = ('BetterStratagemBounce', 'HellpodSteeringUnlocked', 'ReinforcementBeaconsFixed', 'ConsistentVaulting',
+           'ShallowWaterDiving', 'SentryAimRetention', 'EnemyCollisionSynchronized')
+# Gameplay modules whose scripts/module.py returns the wrapper source: wrapper(root, game_sha, exe_sha).
+WRAPPERS = ('ArmoryPreviewCache', 'KnowYourConstellation')
+
+
+def write_entry(component, body, build):
+    """The option's resource: the plaintext entry, which also serves as its discovery entry."""
+    payload = struct.pack('<II', len(body), 2) + body
+    directory = build / component['slug']
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / 'mod.lua.main').write_bytes(payload)
+    (directory / 'entry.lua').write_bytes(body)  # the plain entry, for suites that load it
+    return payload
+
+
+# Standalone addons whose scripts/build.py assemble(*arguments) returns their plaintext entry, declaration first.
+# Their standalone builds pass it through the loader's entry_source, which keeps such an entry as it is, so the
+# option ships the same bytes.
+BUILD_ASSEMBLED = {'FlameDamageFixed': (), 'LaserSentryCooldown': (False,), 'MatchYourColors': (False,),
+                   'StickyGrenadeHandles': (), 'StratagemHeroExpanded': (), 'SoundSystemsRebalanced': (),
+                   'FoliagePassThrough': (), 'HolsterYourShield': ()}
+# Resources a component ships beside its module (Hellpod Drop Hold's compiled implementation), by slug:
+# {resource hash: payload}. The lock pins each one in the component's extra_resources.
+EXTRA = {}
+
+
+def build_entry(root, slug):
+    """A BUILD_ASSEMBLED component's standalone entry, from its own scripts/build.py assemble()."""
+    if 'build_addon' not in sys.modules:
+        import types
+        sys.modules['build_addon'] = types.ModuleType('build_addon')
+        sys.modules['build_addon'].entry_source = None
+    module = load_script(root, 'scripts/build.py', slug + '_build')
+    body = module.assemble(*BUILD_ASSEMBLED[slug])
+    if not body.startswith(('-- HD2-Addon: ' + module.LUA_NAME + '\n').encode()):
+        raise ValueError(slug + ' entry lacks its declaration')
+    return body
+
+
+def two_resource_entry(root, component, build):
+    """Hellpod Drop Hold's scripts/module.py build_module(): a plaintext entry that requires its compiled
+    implementation, a second resource. The entry is the option's resource; the implementation goes to EXTRA and to
+    build/<slug>/extra/ for the suites that load it."""
+    slug = component['slug']
+    module = load_script(root, 'scripts/module.py', slug + '_module')
+    resources = module.build_module(root, build / slug, component['module'], component['revision'])
+    payload = resources.pop(resource_hash(component['module']))
+    EXTRA[slug] = resources
+    folder = build / slug / 'extra'
+    folder.mkdir(parents=True, exist_ok=True)
+    for name in component.get('extra_resources', {}):
+        if resource_hash(name) in resources:
+            (folder / (name.rsplit('/', 1)[-1] + '.lua.main')).write_bytes(resources[resource_hash(name)])
+    return payload
+
+
+def hover_source(root, component):
+    """Controllable Hover Pack's scripts/build.py wrapper (that script also runs its tests and packages)."""
+    source = ''
+    for variable, filename in [('runtime', 'bingus_runtime.lua'), ('runtime_memory', 'bingus_memory.lua'),
+                               ('runtime_write', 'bingus_write.lua'), ('create_api', 'windows_api.lua'),
+                               ('policy', 'cancel.lua'), ('settings', 'settings.lua'), ('patch', 'hover_data.lua'),
+                               ('install', 'archive_loader.lua')]:
+        source += f'local {variable}=(function()\n{(root / "src" / filename).read_text()}\nend)()\n'
+    source += 'patch.policy=policy;patch.settings=settings\n'
+    source += ("install(function()return create_api(runtime,runtime_write.extend(runtime_memory.new(runtime)))end,"
+               f"patch,{{revision='{component['revision']}',game_sha256='{GAME_DLL_SHA}',exe_sha256='{EXE_SHA}'}},"
+               "runtime)\n")
+    return source
+
+
+def component_resource(component, build):
+    root = ROOT / 'components' / component['slug']
+    slug = component['slug']
+    if slug in ASSEMBLED:
+        module = load_script(root, 'scripts/entry.py', slug + '_entry')
+        body = (module.entry_text(root, component['version']) if component.get('version')
+                else module.entry_text(root))
+        return write_entry(component, body, build)
+    if slug in BUILD_ASSEMBLED:
+        return write_entry(component, build_entry(root, slug), build)
+    if slug == 'HellpodDropHold':
+        return two_resource_entry(root, component, build)
+    if slug in MODULES:
+        module = load_script(root, 'scripts/module.py', slug + '_module')
+        (payload,) = module.build_module(root, build / slug, component['module'], component['patch'],
+                                         component['revision']).values()
+        return payload
+    if slug in WRAPPERS:
+        module = load_script(root, 'scripts/module.py', slug + '_module')
+        return compile_resource(module.wrapper(root, GAME_DLL_SHA, EXE_SHA), build / slug)
+    if slug == 'ControllableHoverPack':
+        return compile_resource(hover_source(root, component), build / slug)
+    raise ValueError('No standalone build recipe for ' + slug)
+
+
+def build_component(component, build=BUILD):
+    """The option's resource, assembled exactly as the component's standalone build does; it must equal the
+    pinned standalone resource byte for byte."""
     root = ROOT / 'components' / component['slug']
     for relative, expected in component['source_sha256'].items():
         if sha((root / relative).read_bytes()) != expected:
             raise ValueError('Pinned source changed: ' + component['slug'] + '/' + relative)
-    if component['slug'] == 'BetterLobbyManagement':
-        # The standalone build assembles its plaintext entry from src/ with scripts/entry.py; the option ships
-        # those exact bytes, which carry the discovery declaration, so they are also its entry.
-        import importlib.util
-        spec = importlib.util.spec_from_file_location('lobby_entry', root / 'scripts/entry.py')
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        body = module.entry_text(root, component['version'])
-        payload = struct.pack('<II', len(body), 2) + body
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Addon resource differs from the verified standalone release: ' + component['slug'])
-        directory = build / component['slug']
-        directory.mkdir(parents=True, exist_ok=True)
-        (directory / 'mod.lua.main').write_bytes(payload)
-        (directory / 'better_lobby_management.lua').write_bytes(body)  # the plain entry, for its test_entry
-        return payload
-    if component.get('source'):
-        # A standalone addon that declares itself on its first line: the option
-        # ships the standalone resource byte for byte, with no wrapper and no
-        # recompilation, and the same bytes are its discovery entry.
-        body = (root / component['source']).read_bytes()
-        payload = struct.pack('<II', len(body), 2) + body
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Addon resource differs from the verified standalone release: ' + component['slug'])
-        directory = build / component['slug']
-        directory.mkdir(parents=True, exist_ok=True)
-        (directory / 'mod.lua.main').write_bytes(payload)
-        return payload
-    if component['slug'] == 'ArmoryPreviewCache':
-        import importlib.util
-        spec = importlib.util.spec_from_file_location('armory_module', root / 'scripts/module.py')
-        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
-        payload = compile_resource(module.wrapper(root, GAME_DLL_SHA, EXE_SHA), build / component['slug'])
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Armory resource differs from tested standalone release')
-        return payload
-    if component['slug'] == 'ClickableScrollbars':
-        # This addon is already a plaintext discovery entry whose body installs
-        # itself, so the pack ships the standalone source verbatim: the option
-        # deploys the exact bytes the standalone release does, with no wrapper
-        # and no recompilation.
-        body = (root / 'src/clickable_scrollbars.lua').read_bytes()
-        payload = struct.pack('<II', len(body), 2) + body
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Scrollbar resource differs from the verified standalone release')
-        directory = build / component['slug']
-        directory.mkdir(parents=True, exist_ok=True)
-        (directory / 'mod.lua.main').write_bytes(payload)
-        return payload
-    if component['slug'] == 'GalacticMenuHotkey':
-        filename = 'galactic_menu_hotkey.lua'
-        body = (root / 'src' / filename).read_bytes()
-        payload = struct.pack('<II', len(body), 2) + body
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Addon resource differs from verified standalone: ' + component['slug'])
-        directory = build / component['slug']
-        directory.mkdir(parents=True, exist_ok=True)
-        (directory / 'mod.lua.main').write_bytes(payload)
-        return payload
-    if component['slug'] == 'ArcThrowerRevamped':
-        # Same shape as the scrollbar option: the standalone addon is a
-        # plaintext discovery entry, so the pack ships those exact bytes.
-        body = (root / 'src/arc_thrower_auto.lua').read_bytes()
-        payload = struct.pack('<II', len(body), 2) + body
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Arc thrower resource differs from the verified standalone release')
-        directory = build / component['slug']
-        directory.mkdir(parents=True, exist_ok=True)
-        (directory / 'mod.lua.main').write_bytes(payload)
-        # The addon declares itself on its first line, so the same bytes are
-        # also its discovery entry.
-        (directory / 'entry.lua.main').write_bytes(payload)
-        return payload
-    if component['slug'] == 'KnowYourConstellation':
-        import importlib.util
-        spec = importlib.util.spec_from_file_location('constellation_module', root / 'scripts/module.py')
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        payload = compile_resource(module.wrapper(root, GAME_DLL_SHA, EXE_SHA, rows=rows), build / component['slug'])
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Constellation runtime differs from the tested standalone release')
-        return payload
-    if component['slug'] == 'ControllableHoverPack':
-        source = ''
-        for variable, filename in [('create_api','windows_api.lua'),('policy','cancel.lua'),('settings','settings.lua'),('patch','hover_data.lua'),('install','archive_loader.lua')]:
-            source += f'local {variable}=(function()\n{(root / "src" / filename).read_text()}\nend)()\n'
-        source += 'patch.policy=policy;patch.settings=settings\n'
-        source += f"install(create_api,patch,{{revision='{component['revision']}',game_sha256='{GAME_DLL_SHA}',exe_sha256='{EXE_SHA}'}})\n"
-        payload = compile_resource(source, build / component['slug'])
-        if sha(payload) != component['resource_sha256']:
-            raise ValueError('Hover resource differs from verified standalone release')
-        return payload
-    parts = [('create_api', 'windows_api.lua'), ('patch', component['patch'])]
-    vaulting = component['slug'] == 'ConsistentVaulting'
-    if vaulting:
-        parts.append(('assistance', 'slope_assist.lua'))
-    collision = component['slug'] == 'EnemyCollisionSynchronized'
-    if collision:
-        parts.append(('profiler', 'profiler.lua'))
-    parts.append(('install_loader', 'archive_loader.lua'))
-    source = ''
-    for variable, filename in parts:
-        source += f'local {variable} = (function()\n{(root / "src" / filename).read_text(encoding="utf-8")}\nend)()\n'
-    if vaulting:
-        source += 'patch.assistance = assistance\nassistance.candidate = patch.assist_candidate\n'
-    if collision:
-        source += 'patch.profiler = profiler\n'
-    source += f"install_loader(create_api, patch, {{revision = '{component['revision']}', "
-    source += f"exe_sha256 = '{EXE_SHA}', game_sha256 = '{GAME_DLL_SHA}'" + '})\n'
-    payload = compile_resource(source, build / component['slug'])
+    payload = component_resource(component, build)
     if sha(payload) != component['resource_sha256']:
-        raise ValueError('Gameplay bytecode differs from pinned release: ' + component['slug'])
+        raise ValueError('Resource differs from the standalone build: ' + component['slug'] + ' ' + sha(payload))
+    extras = EXTRA.get(component['slug'], {})
+    pinned = component.get('extra_resources', {})
+    if set(extras) != {resource_hash(name) for name in pinned}:
+        raise ValueError('Extra resources differ from the pinned list: ' + component['slug'])
+    for name, expected in pinned.items():
+        if sha(extras[resource_hash(name)]) != expected:
+            raise ValueError('Extra resource differs from the standalone build: ' + name)
     return payload
 
 
-def input_actions_archive(component):
-    """Mod Bindings Menu's native input actions (content/input), built by its own pinned build script from
-    the builder's unmodified content/input.config (HD2_INPUT_CONFIG), exactly as its standalone release."""
-    import importlib.util
-    import types
-    config = os.environ.get('HD2_INPUT_CONFIG')
-    if not config:
-        raise ValueError('Set HD2_INPUT_CONFIG to your extracted, unmodified content/input.config (CONTRIBUTING.md)')
-    # The script's own packaging imports the shared loader's build_addon; only its config functions run here.
-    if 'build_addon' not in sys.modules:
-        stub = types.ModuleType('build_addon')
-        stub.entry_source = None
-        sys.modules['build_addon'] = stub
-    spec = importlib.util.spec_from_file_location('bindings_build', ROOT / 'components' / component['slug'] / 'scripts/build.py')
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    vanilla = Path(config).read_bytes()
-    if sha(vanilla) != component['input_config_sha256'] or module.CONFIG_SHA256 != component['input_config_sha256']:
-        raise ValueError('HD2_INPUT_CONFIG is not the unmodified content/input.config of Steam build 25480438')
-    archive = module.typed_archive(module.CONFIG_NAME, module.CONFIG_TYPE, module.extend_input_config(vanilla))
-    if sha(archive) != component['input_archive_sha256']:
-        raise ValueError('Input action resource differs from the verified standalone release')
+def music_archive(component):
+    """Sound Systems Rebalanced's patched music_init sound bank, built by its own pinned scripts/biome_patch.py from the
+    builder's five unmodified vanilla music banks (HD2_MUSIC_BANKS), exactly as its standalone release."""
+    folder = os.environ.get('HD2_MUSIC_BANKS')
+    if not folder:
+        raise ValueError('Set HD2_MUSIC_BANKS to a folder holding the five unmodified music banks (CONTRIBUTING.md)')
+    banks = {name: sha((Path(folder) / (name + '.wwise_bank')).read_bytes()) for name in component['music_banks_sha256']}
+    if banks != component['music_banks_sha256']:
+        raise ValueError('HD2_MUSIC_BANKS does not hold the unmodified music banks of Steam build 25480438')
+    module = load_script(ROOT / 'components' / component['slug'], 'scripts/biome_patch.py', 'music_patch')
+    archive, _ = module.build(Path(folder))
+    if sha(archive) != component['music_archive_sha256']:
+        raise ValueError('Music bank resource differs from the verified standalone release')
     return archive
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--rows', action='store_true', help='Build the static forecast rows alternative')
-    parser.add_argument('--skip-desktop-capture', action='store_true',
-                        help='Skip interactive capture and record it as unverified')
+    parser.add_argument('--desktop-capture', action='store_true',
+                        help='Also run the interactive desktop capture (otherwise recorded as unverified)')
     args = parser.parse_args()
-    build = BUILD / 'rows' if args.rows else BUILD
-    components = load_components(args.rows)
+    build = BUILD
+    components = load_components()
     if not components or len({c['module'] for c in components}) != len(components):
         raise ValueError('Expected distinct gameplay components')
-    resources = {resource_hash(c['module']): build_component(c, build, args.rows) for c in components}
+    resources = {resource_hash(c['module']): build_component(c, build) for c in components}
     resources[resource_hash(MODULE)] = compile_resource(
         (ROOT / 'src/megapack.lua').read_text(encoding='utf-8'), build)
     def entry(component):
@@ -273,8 +276,11 @@ def main():
         return discoverable_resource(component['module'], resource, build / component['slug'])
     resources = {resource_hash(c['module']): entry(c)
                  for c in [*components, {'module': MODULE, 'slug': ''}]}
+    # A component's extra resources (pinned in its extra_resources) ship verbatim beside its entry.
+    for component in components:
+        resources.update(EXTRA.get(component['slug'], {}))
     component_tests = [sys.executable, ROOT / 'tests/test_components.py', build]
-    if args.skip_desktop_capture: component_tests.append('--skip-desktop-capture')
+    if args.desktop_capture: component_tests.append('--desktop-capture')
     loader_build = Path(os.environ.get('HD2_SHARED_LOADER_BUILD', ROOT.parent / 'BingusSharedLoader/build'))
     duplicate_args = [value for c in components for value in (c['module'], c['slug'])]
     # The option-subset suites replay every selection; they only read build outputs, so they run at once.
@@ -288,45 +294,38 @@ def main():
         # Both managers deploy only enabled Include folders. Carry the identical
         # identity in each option so any nonempty selection reports the pack.
         # The loader resolves this stable resource ID once, as with standalones.
-        keys = (resource_hash(MODULE), resource_hash(component['module']))
+        keys = (resource_hash(MODULE), resource_hash(component['module']),
+                *(resource_hash(name) for name in component.get('extra_resources', {})))
         archive = make_archive({key: resources[key] for key in keys})
         for suffix, data in [('', archive), ('.stream', b''), ('.gpu_resources', b'')]:
             path = directory / (ARCHIVE + suffix)
             path.write_bytes(data)
             files[folder + '/' + path.name] = path.relative_to(ROOT).as_posix()
-        if component.get('input_archive_sha256'):
-            # Mod Bindings Menu also ships its input actions, as a second archive
-            # in the same option, like its standalone release.
-            for suffix, data in [('', input_actions_archive(component)), ('.stream', b''), ('.gpu_resources', b'')]:
-                path = directory / (INPUT_ARCHIVE + suffix)
+        if component.get('music_archive_sha256'):
+            # Sound Systems Rebalanced also ships its patched music_init sound bank, as a second archive in the same
+            # option, like its standalone release.
+            for suffix, data in [('', music_archive(component)), ('.stream', b''), ('.gpu_resources', b'')]:
+                path = directory / (MUSIC_ARCHIVE + suffix)
                 path.write_bytes(data)
                 files[folder + '/' + path.name] = path.relative_to(ROOT).as_posix()
-        description = OPTION_DESCRIPTIONS[component['slug']]
-        if args.rows and component['slug'] == 'KnowYourConstellation':
-            description += ' Uses the static Rows layout.'
-        options.append({'Name': component['name'], 'Description': description,
-                        'Include': [folder]})
+        options.append({'Name': component['name'], 'Description': OPTION_DESCRIPTIONS[component['slug']],
+                        'Include': [folder], 'Image': 'images/' + component['slug'] + '.jpg'})
     report = {
         'name': 'Vanilla Plus Megapack', 'slug': 'VanillaPlusMegapack', 'revision': REVISION, 'guid': GUID,
-        'description': 'Choose any of the seventeen bundled mods in this pack\'s Options menu in Arsenal or HD2MM. Requires the separate Bingus Shared Loader v18. Disable standalone copies of features you want turned off. Close the game, select your options, then Purge / Deploy. With default Arsenal priority put the loader last.',
+        'description': 'Choose any of the twenty-five bundled mods in this pack\'s Options menu in Arsenal or HD2MM. Requires the separate Bingus Shared Loader v18. Disable standalone copies of features you want turned off. Close the game, select your options, then Purge / Deploy. With default Arsenal priority put the loader last.',
         'requires': [{'name': 'Bingus Shared Loader', 'guid': '612eaf70-d682-43c7-9efd-16dcc695f977', 'api': 1, 'revision': 'loader-v18'}],
         'game_exe_sha256': EXE_SHA, 'game_dll_sha256': GAME_DLL_SHA,
         'deployment_files': files, 'options': options,
         'files': {p: sha((ROOT / p).read_bytes()) for p in files.values()},
         'runtime_verified': False, 'boot_replaced': False, 'loader_bundled': False,
-        'desktop_capture_verified': not args.skip_desktop_capture,
-        'components': [{k: c[k] for k in ('name', 'slug', 'revision', 'module', 'resource_sha256')} for c in components],
+        'desktop_capture_verified': args.desktop_capture,
+        'components': [{**{k: c[k] for k in ('name', 'slug', 'revision', 'module', 'resource_sha256')},
+                        **({'extra_resources': c['extra_resources']} if 'extra_resources' in c else {})}
+                       for c in components],
         'resource_sha256': {f'{key:016x}': sha(value) for key, value in sorted(resources.items())},
     }
-    if args.rows:
-        report.update(name='Vanilla Plus Megapack Rows', slug='VanillaPlusMegapackRows',
-                      revision=ROWS_REVISION, version=VERSION, guid=ROWS_GUID,
-                      install_instructions='INSTALL-ROWS.txt')
-        report['description'] = report['description'].replace(';', '.') + ' Alternate with the static constellation rows. Enable only one megapack variant.'
     release = package_release(ROOT, build, report)
     check = [sys.executable, ROOT / 'tests/test_package.py', release, build]
-    if args.rows:
-        check += ['--rows', release_directory(ROOT) / f'Vanilla-Plus-Megapack-v{VERSION}.zip']
     tests += run_parallel(check, [LUA, ROOT / 'tests/test_loader.lua', build, loader_build, 'discovery'])
     report['offline_tests'] = tests.strip()
     report['release_sha256'] = sha(release.read_bytes())

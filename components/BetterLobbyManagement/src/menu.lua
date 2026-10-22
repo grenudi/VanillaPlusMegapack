@@ -3,18 +3,20 @@
 -- confirm dialog.
 --
 -- The tab keeps a list of up to five native buttons and one type byte per
--- button; the game uses types 0-4 and on the ship a host uses two slots. The
--- mod adds its buttons with types 5+ in the free slots. The game's select
--- handler and its dialog result dispatch act only on types 0-4, but the select
--- handler still shows the shared confirm dialog for any type, so the mod fills
--- that dialog while it is hidden, as soon as the focus lands on one of its
--- buttons, and runs the action when the dialog comes back confirmed. The
--- escape screen, and with it every button, is freed when the menu closes; the
--- buttons are added again whenever they are missing.
+-- button; the game uses types 0-4, and a host uses two slots on the ship and
+-- two (alone) or three in a mission. The mod adds its buttons with types 5+
+-- in the free slots. The game's select handler and its dialog result
+-- dispatch act only on types 0-4, but the select handler still shows the
+-- shared confirm dialog for any type, so the mod fills that dialog while it is
+-- hidden, as soon as the focus lands on one of its buttons, and runs the
+-- action when the dialog comes back confirmed. The escape screen, and with it
+-- every button, is freed when the menu closes; the buttons are added again
+-- whenever they are missing.
 local M = {}
 
 M.MENU_SYSTEM_PTR = 0x347ce38
 M.SCREEN = 200                  -- menu system -> escape screen (0 while the menu is closed)
+M.CONFIRM_RETRY = 60            -- idle gate: calls between tries to confirm a new menu system
 M.SHOWN = 8                     -- screen: shown content (0 GAME, 1 SOCIAL, 2 OPTIONS)
 M.CONTENT = 281480              -- screen -> GAME content
 -- GAME content
@@ -40,7 +42,7 @@ M.TEXT_TEMPLATE, M.TEXT_KEY = 0xc67c7faf, 0xab2a7b35
 M.NATIVE_LABELS = {[0] = 0x42d7cf06, [1] = 0x65e0947b, [2] = 0x801ec7e7, [3] = 0x1f6ff863, [4] = 0xcc934148}
 M.CONFIRM_LABEL, M.CANCEL_LABEL = 0xd94b7608, 0x8a36d40a
 M.FIRST_TYPE = 5
-M.ACTIONS = {'disband', 'promote'}
+M.ACTIONS = {'disband', 'promote', 'cancel_sos'}
 -- The player menu's own KICK (game_kick). The tab update takes input only
 -- while the dialog fade is 0, the dialog is inactive and not opening and the
 -- squad panel is in state 2; then it runs the focused card's popup (state 2),
@@ -203,17 +205,29 @@ function M.new(api, game, natives, status, note)
         return api.write_words(base + first, last - first + 4, flat)
     end
 
-    -- The open escape screen, or 0. The menu system and a new screen are each
-    -- confirmed once with a guarded read; later frames use direct loads.
-    local function open_screen()
+    -- The escape screen is closed: what it held is forgotten (the screen, a
+    -- refused write, the dialog prepared, open or holding our text). The one
+    -- close path, for screen() and the idle gate (closed) alike.
+    local function forget_screen()
+        screen_cache, refused, prepared, pending, release = 0, false, nil, nil, false
+    end
+    -- The menu system, or 0 (not there, or a new one not readable yet).
+    local function menu_system()
         local menu = api.load64(game + M.MENU_SYSTEM_PTR)
         if menu == 0 or menu % 8 ~= 0 then return 0 end
         if menu ~= menu_cache then
             if not api.read64(menu + M.SCREEN) then return 0 end
             menu_cache = menu
         end
+        return menu
+    end
+    -- The open escape screen, or 0. The menu system and a new screen are each
+    -- confirmed once with a guarded read; later frames use direct loads.
+    local function open_screen()
+        local menu = menu_system()
+        if menu == 0 then return 0 end
         local screen = api.load64(menu + M.SCREEN)
-        if screen == 0 or screen % 8 ~= 0 then screen_cache, refused = 0, false; return 0 end
+        if screen == 0 or screen % 8 ~= 0 then forget_screen(); return 0 end
         if screen ~= screen_cache then
             if not api.read32(screen + M.SHOWN) or not api.read32(screen + M.CONTENT + M.COUNT) then return 0 end
             screen_cache, prepared, pending, release, labels, last_answered = screen, nil, nil, false, {}, 0
@@ -317,11 +331,40 @@ function M.new(api, game, natives, status, note)
         release, prepared = false, nil
     end
 
+    -- The addon's fresh start (a pause after an error below it): the dialog in
+    -- progress is forgotten, so an answer given meanwhile runs nothing, and the
+    -- focus sets the dialog up again. Our buttons and texts stay as they are.
+    function self.reset()
+        prepared, pending, last_answered = nil, nil, 0
+    end
+
     -- The open escape screen, or 0 (two direct loads while the menu is closed).
     function self.screen()
         local screen = open_screen()
         if screen == 0 then prepared, pending, release = nil, nil, false end
         return screen
+    end
+
+    -- The addon's idle gate: true while the escape screen is closed, which
+    -- goes through forget_screen, the path a host closing the menu has always
+    -- taken through screen(). An open screen, or a menu system that is not
+    -- there or not confirmed readable, is left to the full frame untouched.
+    -- Idle: two direct loads, no call into Windows. The menu system is
+    -- confirmed once (one guarded read); a confirm that fails is tried again
+    -- on every M.CONFIRM_RETRY-th call, not every frame.
+    local confirm_wait = 0
+    function self.closed()
+        local menu = api.load64(game + M.MENU_SYSTEM_PTR)
+        if menu == 0 or menu % 8 ~= 0 then return false end
+        if menu ~= menu_cache then
+            if confirm_wait > 0 then confirm_wait = confirm_wait - 1; return false end
+            if menu_system() == 0 then confirm_wait = M.CONFIRM_RETRY - 1; return false end
+        end
+        local screen = api.load64(menu + M.SCREEN)
+        if screen ~= 0 and screen % 8 == 0 then return false end
+        -- Only a screen seen open holds state (screen_cache 0: forgotten already).
+        if screen_cache ~= 0 then forget_screen() end
+        return true
     end
 
     -- One frame on an open escape screen while the host has a squad.

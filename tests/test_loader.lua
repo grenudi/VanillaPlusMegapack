@@ -49,11 +49,19 @@ local names = {pack, 'mods/cowboybingus/better_stratagem_bounce',
     'mods/cowboybingus/sentry_aim_retention', 'mods/cowboybingus/corpse_collision_repair', 'mods/cowboybingus/hover_pack_cancel', 'mods/cowboybingus/enemy_intelligence', 'mods/cowboybingus/armory_preview_cache',
     'mods/cowboybingus/clickable_scrollbars', 'mods/cowboybingus/arc_thrower_auto', 'mods/cowboybingus/galactic_menu_hotkey',
     'mods/cowboybingus/flame_damage_fixed', 'mods/cowboybingus/mod_options_menu', 'mods/cowboybingus/mod_bindings_menu',
-    'mods/cowboybingus/better_lobby_management'}
+    'mods/cowboybingus/better_lobby_management', 'mods/cowboybingus/hellpod_drop_hold',
+    'mods/cowboybingus/laser_sentry_cooldown', 'mods/cowboybingus/match_your_colors', 'mods/cowboybingus/sticky_grenade_handles',
+    'mods/cowboybingus/stratagem_hero_expanded', 'mods/cowboybingus/sound_systems_rebalanced',
+    'mods/cowboybingus/foliage_pass_through',
+    'mods/cowboybingus/holster_your_shield'}
 local folders = {'', 'BetterStratagemBounce', 'HellpodSteeringUnlocked', 'ReinforcementBeaconsFixed',
     'ConsistentVaulting', 'ShallowWaterDiving', 'SentryAimRetention', 'EnemyCollisionSynchronized', 'ControllableHoverPack', 'KnowYourConstellation', 'ArmoryPreviewCache',
     'ClickableScrollbars', 'ArcThrowerRevamped', 'GalacticMenuHotkey', 'FlameDamageFixed', 'ModOptionsMenu', 'ModBindingsMenu',
-    'BetterLobbyManagement'}
+    'BetterLobbyManagement', 'HellpodDropHold', 'LaserSentryCooldown', 'MatchYourColors', 'StickyGrenadeHandles',
+    'StratagemHeroExpanded', 'SoundSystemsRebalanced', 'FoliagePassThrough', 'HolsterYourShield'}
+-- Resources an option ships beside its module: Hellpod Drop Hold's entry requires its compiled implementation.
+-- Each is available exactly when its owner is (they share one option archive).
+local extras = {['mods/cowboybingus/hellpod_drop_hold'] = {'mods/cowboybingus/hellpod_drop_hold_impl'}}
 -- The shared loader build carries a built-in registry written before this
 -- component existed, so the registry path cannot see it: in game it is loaded
 -- through declared-entry discovery, which the 'discovery' pass below proves by
@@ -61,13 +69,21 @@ local folders = {'', 'BetterStratagemBounce', 'HellpodSteeringUnlocked', 'Reinfo
 -- instead of pretending the older registry knows the new module.
 local registry_cannot_see = {['mods/cowboybingus/clickable_scrollbars'] = true, ['mods/cowboybingus/arc_thrower_auto'] = true, ['mods/cowboybingus/galactic_menu_hotkey'] = true,
     ['mods/cowboybingus/flame_damage_fixed'] = true, ['mods/cowboybingus/mod_options_menu'] = true, ['mods/cowboybingus/mod_bindings_menu'] = true,
-    ['mods/cowboybingus/better_lobby_management'] = true}
+    ['mods/cowboybingus/better_lobby_management'] = true, ['mods/cowboybingus/hellpod_drop_hold'] = true,
+    ['mods/cowboybingus/laser_sentry_cooldown'] = true, ['mods/cowboybingus/match_your_colors'] = true,
+    ['mods/cowboybingus/sticky_grenade_handles'] = true, ['mods/cowboybingus/stratagem_hero_expanded'] = true,
+    ['mods/cowboybingus/sound_systems_rebalanced'] = true, ['mods/cowboybingus/foliage_pass_through'] = true, ['mods/cowboybingus/holster_your_shield'] = true}
 local function read(path)
     local file = assert(io.open(path, 'rb'))
     local bytes = file:read('*a'); file:close(); return bytes
 end
 local sources = {}
-for i, name in ipairs(names) do sources[name] = read(build .. '/' .. folders[i] .. '/entry.lua.main'):sub(9) end
+for i, name in ipairs(names) do
+    sources[name] = read(build .. '/' .. folders[i] .. '/entry.lua.main'):sub(9)
+    for _, extra in ipairs(extras[name] or {}) do
+        sources[extra] = read(build .. '/' .. folders[i] .. '/extra/' .. extra:match('[^/]+$') .. '.lua.main'):sub(9)
+    end
+end
 local startup = read(loader .. '/callbacks.ljbc')
 if discovery_only then
     local wrapper, replacements = read(loader .. '/callbacks.wrapper.lua'):gsub('local names = {%s*.-\n}', 'local names = {}', 1)
@@ -118,6 +134,7 @@ for _, scenario in ipairs(scenarios) do
             if mask and i > 1 then
                 available[name] = math.floor(mask / 2 ^ (i - 2)) % 2 == 1
             end
+            for _, extra in ipairs(extras[name] or {}) do available[extra] = available[name] end
         end
         if discovery_only then
             local ffi, bit = require('ffi'), require('bit')
@@ -125,8 +142,8 @@ for _, scenario in ipairs(scenarios) do
             for i = 2, #names do
                 if available[names[i]] then
                     archives[#archives + 1] = build .. '/options/' .. folders[i] .. '/9ba626afa44a3aa3.patch_0'
-                    -- The bindings option also deploys its input actions (a config archive): discovery must skip it.
-                    if folders[i] == 'ModBindingsMenu' then
+                    -- The music option also deploys its sound bank (a wwise_bank archive): discovery must skip it.
+                    if folders[i] == 'SoundSystemsRebalanced' then
                         archives[#archives + 1] = build .. '/options/' .. folders[i] .. '/9ba626afa44a3aa3.patch_1'
                     end
                 end
@@ -155,6 +172,13 @@ for _, scenario in ipairs(scenarios) do
                 GetLastError = function() return 18 end,
                 FindClose = function() return 1 end,
             }
+            -- Loader v19 binds these under private bsl_ names (ffi.cdef keeps the
+            -- first prototype of a plain name for the whole game); v18 used the
+            -- plain names. Answer both, so this runs against either loader build.
+            for _, plain in ipairs({'GetModuleFileNameA', 'FindFirstFileA', 'FindNextFileA', 'GetLastError',
+                                    'FindClose'}) do
+                kernel['bsl_' .. plain] = kernel[plain]
+            end
             -- Mocked Win32 calls need no declarations. Repeating cdef thousands
             -- of times exhausts the process-wide LuaJIT CType table; production
             -- discovery declares these once, and the loader's native test covers it.
@@ -214,7 +238,7 @@ for _, scenario in ipairs(scenarios) do
             end
             local identity = env.CowboyBingusModLoader.megapack
             if installed_pack and failure ~= 1 and failure ~= #names + 1 then
-                assert(identity.name == 'Vanilla Plus Megapack' and identity.revision == 'megapack-v35')
+                assert(identity.name == 'Vanilla Plus Megapack' and identity.revision == 'megapack-v42')
                 -- A loader that manages the LuaJIT cache (v18+) sets loader.jit; the pack then leaves it alone.
                 local managed = env.CowboyBingusModLoader.jit and env.CowboyBingusModLoader.jit.managed
                 assert((identity.jit_fallback == nil) == (managed == true))
@@ -246,7 +270,7 @@ end
 local calls = {}
 local recorder = {opt = {start = function(...) calls[#calls + 1] = table.concat({...}, ' ') end}}
 local old = run_pack({version = 16, api = 1, modules = {}}, recorder)
-assert(old.jit_fallback == 'maxmcode=16384 maxtrace=8000' and #calls == 1 and calls[1] == old.jit_fallback)
+assert(old.jit_fallback == 'maxmcode=65536 maxtrace=8000' and #calls == 1 and calls[1] == old.jit_fallback)
 calls = {}
 assert(run_pack({version = 17, api = 1, modules = {}, jit = {managed = true, expanded = false}}, recorder).jit_fallback == nil)
 assert(#calls == 0, 'A managed cache stays with the loader, whatever its current limits')

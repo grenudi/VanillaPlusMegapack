@@ -1,4 +1,142 @@
-# v35
+# v42
+
+- Arc Thrower Revamped v1.7.1: does nothing on a game build it does not know; it now checks the game's files before anything else.
+- Arc Thrower Revamped v1.7.1: outside a mission it checks every 60 frames whether one has started and reads nothing in between. Measured in game: 0.0035 ms per frame on the ship instead of 0.017-0.018, and 0.011-0.013 ms in missions instead of 0.016-0.018.
+- Arc Thrower Revamped v1.7.1: runs in LuaJIT's interpreter, using about 0.2 KB of the code cache the game and every mod share instead of about 5 KB, and no longer makes the game's Lua compiler retry compiling it every frame.
+- Clickable Scrollbars v2.15.1: does nothing on a game build it does not know; it now checks the game's files before anything else.
+- Clickable Scrollbars v2.15.1: a frame with no new press ends right after reading the mouse button, and its per-frame code no longer makes the game's Lua compiler retry compiling it every frame.
+- Mod Bindings Menu v2.3: no fixed limit on mod bindings; bindings past the 36 native actions go on a new MORE MODS tab, offered outside missions only.
+- Mod Bindings Menu v2.3: extended bindings support Press, Release and Hold, modifiers, and keyboard, mouse and controller.
+- Mod Bindings Menu v2.3: two older mods that both ask for slot 2 no longer swap keys when their load order changes.
+- Mod Bindings Menu v2.3: prevent Revert from restoring hidden developer mouse and controller inputs that could make mission-selection clicks reopen the Galactic Map with Ship Station Hotkeys.
+- Mod Bindings Menu v2.3: the MODS tab's first section header is no longer blank in game languages other than English, Japanese and Simplified Chinese.
+- Mod Bindings Menu v2.3: every game text ID it borrows now exists in all of the game's languages; up to 59 different texts show on the MODS tab at once, down from 65.
+- Mod Bindings Menu v2.3: never changes the game's memory protection; a write to a page that is not writable is skipped and logged.
+- Mod Bindings Menu v2.3: no longer replaces the game's input configuration; its six keyboard defaults are added while the game runs, only on a supported game build.
+- Mod Bindings Menu v2.3: outside the binding pages a frame reads game memory once instead of twice, and the game's Lua compiler no longer keeps retrying to compile its per-frame check. Measured in game: 0.006 ms per frame on the ship instead of 0.009, and 0.005-0.006 ms in missions instead of 0.010-0.012.
+- Match Your Colors v1.5: new Recolor Squadmates option: squadmates without the mod, or every squadmate, are recolored with your settings, on your screen only.
+- Match Your Colors v1.5: Match Materials now also turns a painted hard part into the metal it takes, such as the B-22 Model Citizen's chrome or the Eye of Liberty cape's gold; cloth never turns into metal.
+- Match Your Colors v1.5: with Helmet and Armor Match Cape your gear matches the cape as it looks in the game, so the default black capes give a black armor, not a grey one.
+- Match Your Colors v1.5: an armor that would turn one solid color, such as the SA-25 Steel Trooper or the SA-04 Combat Technician with the CE-35 Trench Engineer, takes the helmet's or cape's own second, dark and accent colors on its clothing, straps and trims.
+- Match Your Colors v1.5: a vivid helmet or armor color covering a tenth of it or more, but less than its main color, reaches the other item's parts, brown leather, tan and khaki parts never take a vivid accent such as the PH-9 Predator's red beret, and clothing never takes a colored metal's flat paint.
+- Match Your Colors v1.5: modded gear that paints its colors into its texture instead of the game's color table, such as the Cowboy Hat mod, now gives its colors and takes yours.
+- Match Your Colors v1.5: cape designs drawn light on dark keep a readable contrast on their new colors (Proof of Faultless Virtue, Botslayer), and a recolored design sheet is only reused for one of the same layout.
+- Match Your Colors v1.5: new Recolor Weapons option (experimental, Off by default): your primary, sidearm and support weapon take your colors the way the game's weapon paint schemes repaint a weapon; with one of those schemes picked as Paint Scheme they wear it exactly as the game paints it.
+- Match Your Colors v1.5: Sync With Mod Users shares its settings in a form new options can extend, so squadmates with the mod see each other's weapons in their colors; squadmates on v1.3 and v1.4 still see the helmet, armor and cape settings.
+- Match Your Colors v1.5: on the loadout screen's squad cards your Helldiver shows your colors and each squadmate's shows theirs (or yours with Recolor Squadmates); a squadmate's card no longer takes your colors.
+- Match Your Colors v1.5: squadmates are now recolored in missions too; the mod looked for them only among your own player's records.
+- Match Your Colors v1.5: new choice Squadmates' Colors: Their Own Gear (default) or Your Colors, which gives the squadmates Recolor Squadmates recolors your colors, so the squad matches you.
+- Match Your Colors v1.5: new choice Hide Cape: Your Cape hides your cape on the ship and in missions, also for squadmates who use the mod; Everyone's Capes hides every squadmate's cape on your screen too.
+- Armory Preview Cache v23.1: with no Armory or briefing screen open and nothing loading, a frame makes two reads of game memory and nothing else. Measured in game: 0.05 ms per frame on the ship instead of 0.13, and 0.010-0.013 ms in missions instead of 0.035-0.040.
+- Armory Preview Cache v23.1: with thumbnails kept and the Armory closed, memory is checked every 2 seconds instead of every 50 ms, so low memory releases them within 2 seconds.
+- Better Lobby Management v1.2.1: while the escape menu is closed and nothing is in progress, it only looks whether the menu has opened, instead of reading the session every frame.
+- Consistent Vaulting v8.9.1: while the climb input is released a frame reads only that input, with the full check every 10th frame and at once on a press; outside a mission it checks every 60th frame. Measured in game: 0.003 ms per frame on the ship instead of 0.013-0.015, and 0.008-0.009 ms in missions instead of 0.025-0.027.
+- Consistent Vaulting v8.9.1: after a respawn or a teammate leaving the mission, your climb input is found again within 10 frames; a tap that ends before then is missed, and a press held through it needs a fresh press for slope assistance.
+- Controllable Hover Pack v1.8.1: between hover-pack flights most frames read only the pack's state, or nothing on the ship and without a hover pack. Measured in game: 0.003 ms per frame on the ship instead of 0.009, and 0.003-0.004 ms in missions without a hover pack instead of 0.016-0.018.
+- Enemy Collision Synchronized v2.13.0: a poll with nothing to inspect no longer re-reads every enemy or the clock, and a corpse that has needed no correction for about a second is re-checked less often (at most 3-4 s apart). Measured in game: 0.021-0.022 ms per frame in missions instead of 0.036-0.047, and 0.025 under heavy load instead of 0.099.
+- Enemy Collision Synchronized v2.13.0: a settled ragdoll's motion check no longer makes Lua tables, with the same results.
+- Hellpod Steering Unlocked v7.5.1: the 100 ms check for a mission reset reads only the avoidance flag, with a full check every second. Measured in game: 0.003 ms per frame instead of 0.005-0.006, on the ship and in missions.
+- Know Your Constellation v4.1.1: while neither the war table nor the briefing is open, the forecast reads only which screen is on top. Measured in game: 0.006 ms per frame on the ship instead of 0.010-0.013, and 0.005-0.006 ms in missions instead of 0.008.
+- Mod Options Menu v1.2.1: Fixed: opening the escape menu and going straight to MODS, then to OPTIONS, drew the categories MODS had hidden on top of GAMEPLAY until the menu was opened again; every category now keeps its place.
+- Reinforcement Beacons Fixed v4.6.1: between deaths it reads only your own spawn state, 2 memory reads per frame in a mission instead of 9-10. Measured in game: 0.010-0.011 ms per frame in missions instead of 0.028-0.032.
+- Sentry Aim Retention v1.1.1: with none of your sentries deployed it waits instead of reading the targeting registry every frame. Measured in game: 0.003 ms per frame on the ship instead of 0.011, 0.003-0.004 ms in missions instead of 0.010, and 0.006 ms under heavy load instead of 0.016.
+- Shallow Water Diving v3.10.1: waits for a dive with fewer memory reads. Measured in game: 0.002 ms per frame on the ship instead of 0.009-0.010, and 0.009-0.010 ms in missions instead of 0.012-0.015.
+- Ship Station Hotkeys v1.9.1: with Mod Bindings Menu an idle frame aboard the ship makes one read of game memory, and a two-read mission check every 60 frames replaces the ship search every 15 frames. Measured in game: 0.014 ms per frame on the ship instead of 0.032-0.035.
+- Better Stratagem Bounce v15.4.1, Hellpod Drop Hold v1.2.1, Laser Sentry Cooldown v1.1.1 and Sticky Grenade Handles v1.0.1: their per-frame code no longer makes the game's Lua compiler retry compiling it every frame; such retries from many mods kept the game recompiling indefinitely.
+- New option: Stratagem Hero Expanded v1.0: the ship's Stratagem Hero arcade draws from all 96 loadout stratagems and 12 common mission stratagems (108) instead of its 27 launch-era ones; themed rounds stay.
+- New option: Sound Systems Rebalanced v1.0: mission music plays at the war-table volume in every mission, also when you join one in progress (it was 6 dB louder then), and no longer goes silent on swamp, desert, oasis, deciduous and coniferous forest, hive world and active rift planets.
+- Sound Systems Rebalanced v1.0: sets the volume once when a mission starts, and its planet fix is a change to the game's music sound bank that runs no code. Measured in game: 0.005 ms per frame on the ship.
+- New option: Foliage Pass-Through v1.0: player rockets, missiles, launcher rounds and stratagem ordnance pass through tree canopies and bushes instead of exploding in them; trunks, the ground and enemies still stop them.
+- New option: Holster Your Shield v1.0: press Backpack Function to put the Ballistic Shield or the Directional Shield on your back while you keep a one-handed weapon in hand; press again to take it back.
+- Each option shows its own mod's cover in Arsenal and HD2MM instead of the pack's.
+- The pack's own icon in Arsenal and HD2MM is now its code-drawn cover.
+
+# v41
+
+- Match Your Colors v1.4: new Color Matching choice Helmet and Armor Match Cape: your helmet and armor take the colors of the cape you wear, and the cape keeps its own.
+- Match Your Colors v1.4: new SEAF paint scheme in the game's SEAF trooper colors, matched against SEAF troopers in the game.
+- Match Your Colors v1.4: color fixes from rendered reviews, among them camo patterns, metal parts, bands and stripes, dark parts and clothing on pieces that also show skin.
+- Match Your Colors v1.4: LUT mods that save their colors as 32-bit float textures no longer make recolors fail.
+- Match Your Colors v1.4: your Helldiver is recolored the frame after it appears, and the textures a recolor needs are made while the game loads, never during play.
+- Match Your Colors v1.4: in 7 minutes of real play, applying a recolor took 0.56-0.61 ms at the median and 1.33 ms at most; its per-frame cost in real play is not measured yet.
+- The other twenty mods are unchanged from v40.
+- Twenty-one independent options; use one copy of each mod: its standalone package or the pack option.
+- Requires Bingus Shared Loader v18 or newer; v19 is recommended.
+
+# v40
+
+- Match Your Colors v1.3: new options Recolor Hoods, Match Materials, Paint Scheme (one of the game's 11 weapon paint schemes) and Recolor Cape (your cape takes the same colors, its emblems kept readable).
+- Match Your Colors v1.3: squadmates who use the mod see each other's colors (Sync With Mod Users, always on); only the settings travel, as a value of the squad's online lobby.
+- Match Your Colors v1.3: helmets and armors changed by other mods are recolored from their modded colors, and glowing parts keep their colors.
+- Match Your Colors v1.3: color fixes from manual testing and rendered reviews, among them dark suits, hoods, metal parts, accents and patterns.
+- Match Your Colors v1.3: a slow game-data read or cache save no longer holds up a frame; the recolor work waits a frame instead.
+- Match Your Colors v1.3: Sync With Mod Users played between a host and a client, each seeing the other's colors.
+- Match Your Colors v1.3: its per-frame costs are measured offline only; v1.2 measured 0.008 ms per frame in missions.
+- The other twenty mods are unchanged from v39.
+- Twenty-one independent options; use one copy of each mod: its standalone package or the pack option.
+- Requires Bingus Shared Loader v18 or newer; v19 is recommended.
+
+# v39
+
+- Laser Sentry Cooldown v1.1: an overheated Laser Sentry no longer explodes; it cools for about 50 s at its own rate, then its turret powers up and fires again.
+- Laser Sentry Cooldown v1.1: played in a mission, where the sentry fired again about 1 s after its cooldown ended.
+- v38 was a pre-release, so v39 also brings its four new options to anyone updating from v37: Hellpod Drop Hold v1.2, Laser Sentry Cooldown, Match Your Colors v1.2 and Sticky Grenade Handles v1.0.
+- The other twenty mods are unchanged from v38.
+- Twenty-one independent options; use one copy of each mod: its standalone package or the pack option.
+- Requires Bingus Shared Loader v18 or newer; v19 is recommended.
+- Measured in live play: the four mods new since v37 add 0.015 ms per frame in missions (Match Your Colors 0.008, Hellpod Drop Hold 0.004, Laser Sentry Cooldown v1.0 0.002, Sticky Grenade Handles 0.001); Laser Sentry Cooldown v1.1's turret check is not measured in game yet (1 to 3 memory reads every 120 frames).
+
+# v38
+
+- New option: Hellpod Drop Hold v1.2: holds your hellpod in the sky while your loading screen or the join cutscene is up, so you see your drop when you join a mission in progress.
+- New option: Laser Sentry Cooldown v1.0: an overheated Laser Sentry cools down at its own rate and fires again instead of burning out.
+- New option: Match Your Colors v1.2: your helmet takes your armor's colors, or your armor takes your helmet's (Mod Options Menu); only colors change, on your screen only.
+- New option: Sticky Grenade Handles v1.0: the G-123 Thermite and the sticky stun grenade stick when their handle hits first.
+- Twenty-one independent options; use one copy of each mod: its standalone package or the pack option.
+- The other seventeen mods are unchanged from v37.
+- Requires Bingus Shared Loader v18 or newer; v19 is recommended.
+- Measured in live play: the four new mods together add 0.015 ms per frame in missions (Match Your Colors 0.008, Hellpod Drop Hold 0.004, Laser Sentry Cooldown 0.002, Sticky Grenade Handles 0.001).
+
+# v37
+
+- All mods: an error in the game or another mod now pauses the mod instead of stopping it; it resumes once updates run cleanly.
+- All mods: another mod's Windows declarations can no longer break them (Bingus Shared Runtime v1).
+- Arc Thrower Revamped v1.7: about half the memory reads while Fire is held.
+- Armory Preview Cache v23: short Armory visits keep the thumbnails they showed.
+- Armory Preview Cache v23: frames where nothing changed skip the thumbnail work.
+- Better Lobby Management v1.2: Simplified Chinese translation by joyrhyme.
+- Better Lobby Management v1.2: a pause keeps a CANCEL SOS you made.
+- Better Stratagem Bounce v15.4: works alongside mods that change other stratagem navigation flags.
+- Clickable Scrollbars v2.15: fixed skipped updates at high frame rates, for smoother drags and no missed clicks.
+- Clickable Scrollbars v2.15: an idle frame makes 1 Windows call instead of 5.
+- Consistent Vaulting v8.9: an idle check reads 7 values instead of 37-39.
+- Controllable Hover Pack v1.8: 16 memory reads per frame instead of 41 (82 in flight).
+- Enemy Collision Synchronized v2.12.0: fewer memory reads and less garbage per poll.
+- Flame Damage Fixed v1.2: each weapon's collision group is re-checked and moved if another user appears.
+- Hellpod Steering Unlocked v7.5: restores the game's avoidance setting when it pauses or stops.
+- Know Your Constellation v4.1: Hive Worlds list Hive Lords again, and other planet modifiers apply again.
+- Know Your Constellation v4.1: Simplified Chinese translation by joyrhyme.
+- Mod Bindings Menu v2.2: keys set on the MODS tab are never deleted, and bindings are saved with a backup.
+- Mod Options Menu v1.2: more than 8 mods fit the MODS tab, and settings are saved with a backup.
+- Reinforcement Beacons Fixed v4.6: half the memory reads per frame on the ship.
+- Sentry Aim Retention v1.1.0: sentries are no longer located again every check: 0.02 ms per frame with a sentry out instead of 0.18.
+- Shallow Water Diving v3.10: the depth slider no longer goes missing when Mod Options Menu loads late.
+- Ship Station Hotkeys v1.9: reads all six shortcuts in one call per frame.
+- Megapack: with a loader older than v18, the code cache starts at 64 MB instead of 16 MB.
+- Requires Bingus Shared Loader v18 or newer; v19 is recommended.
+- Measured in live play: all 17 mods together cost 0.25 ms per frame in missions (0.59 before) and 0.17 on the ship.
+
+# v36
+
+- Know Your Constellation v4.0: lists every enemy a mission can spawn, named as on the Helldivers wiki, with spawn-rate meters for large enemies.
+- Better Lobby Management v1.1: adds CANCEL SOS, which stops the host's SOS Beacon in a mission.
+- Mod Options Menu v1.1, Mod Bindings Menu v2.1, Ship Station Hotkeys v1.8 and Shallow Water Diving v3.9: texts follow the game's Text Language when a translation is installed.
+- Adds the translation kit: this repository's `components` folder covers all six mods with text (see TRANSLATING.md).
+- Discontinues the Rows package, since Know Your Constellation v4 has a single layout; Rows users should switch to this pack.
+- Measured in live play with all 17 options: the updated mods cost the same as their previous versions (Know Your Constellation about 0.05 ms per frame while its forecast is shown).
+- The other eleven mods are unchanged from v35.
+
+## v35
 
 - New option: [Better Lobby Management](https://github.com/CowboyBingus/BetterLobbyManagement) v1.0, host tools in the escape menu's GAME tab. DISBAND SQUAD kicks every other player back to their own ship. PROMOTE announces the new host with the game's own "*name* is the new squad leader" line, kicks them home with the game's own player-menu KICK, finds their new lobby and moves the whole squad to their ship; only the host needs the mod. It also shortens the Galactic Map lobby scanner's recharge from 20 to 5 seconds (adjustable in Mod Options Menu, never longer than the game's own) and offers an own-continent lobby filter. Measured in recorded play, as separate mods before the merge: 0.003 ms per frame for the lobby tools and 0.001 ms for the scanner.
 - Seventeen independent options. Use one copy of Better Lobby Management: the standalone package or the pack option.

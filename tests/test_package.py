@@ -6,21 +6,45 @@ import struct
 import sys
 import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from build import ARCHIVE, BUILD, GUID, INPUT_ARCHIVE, ROWS_GUID, MODULE, VERSION, REVISION, ROWS_REVISION, ROOT, load_components, resource_hash, sha
+from build import ARCHIVE, ASSEMBLED, BUILD, GUID, MODULE, MUSIC_ARCHIVE, VERSION, REVISION, ROOT, load_components, resource_hash, sha
 
-INPUT, CONFIG = resource_hash('content/input'), resource_hash('config')
+INPUT = resource_hash('content/input')  # the game's input configuration: no option ships it
+MUSIC, BANK = resource_hash('content/audio/music_init'), resource_hash('wwise_bank')
 
 
-def input_actions(data):
-    """Mod Bindings Menu's second archive: exactly one config resource, content/input."""
+def music_bank(data):
+    """Sound Systems Rebalanced's second archive: exactly one wwise_bank resource, content/audio/music_init, without stream
+    or GPU parts."""
     assert struct.unpack_from('<III', data) == (0xF0000011, 1, 1) and struct.unpack_from('<I', data, 88)[0] == 1
-    key, kind, offset = struct.unpack_from('<7Q6I', data, 104)[:3]
-    size = struct.unpack_from('<7Q6I', data, 104)[7]
-    assert key == INPUT and kind == CONFIG and offset % 16 == 0 and offset + size <= len(data)
+    entry = struct.unpack_from('<7Q6I', data, 104)
+    key, kind, offset, size = entry[0], entry[1], entry[2], entry[7]
+    assert key == MUSIC and kind == BANK and offset % 16 == 0 and offset + size <= len(data)
+    assert entry[8] == 0 and entry[9] == 0
     return {key: data[offset:offset + size]}
 
 
-def resources(data):
+def jpeg_size(data):
+    """Width and height from a baseline or progressive JPEG's frame header."""
+    assert data[:3] == b'\xff\xd8\xff'
+    offset = 2
+    while offset + 4 <= len(data):
+        assert data[offset] == 0xFF
+        marker, length = data[offset + 1], struct.unpack_from('>H', data, offset + 2)[0]
+        if marker in (0xC0, 0xC1, 0xC2):
+            height, width = struct.unpack_from('>HH', data, offset + 5)
+            return width, height
+        offset += 2 + length
+    raise AssertionError('no JPEG frame header')
+
+
+def extras(component):
+    """The resource hashes a component ships beside its module (its pinned extra_resources)."""
+    return {resource_hash(name) for name in component.get('extra_resources', {})}
+
+
+def resources(data, compiled=frozenset()):
+    """Each Lua resource of an option archive: declaration-bearing plaintext entries, except the compiled extra
+    resources named in `compiled`, which must be the game's non-GC64 LuaJIT bytecode."""
     count = struct.unpack_from('<I', data, 8)[0]
     assert struct.unpack_from('<III', data) == (0xF0000011, 1, count)
     assert struct.unpack_from('<Q', data, 32)[0] == len(data)
@@ -37,65 +61,73 @@ def resources(data):
         occupied.update(range(offset, offset + size))
         payload = data[offset:offset + size]
         assert struct.unpack_from('<II', payload) == (size - 8, 2)
-        assert payload[8:].startswith(b'-- HD2-Addon: ')
+        assert payload[8:].startswith(b'\x1bLJ\x02\x02' if key in compiled else b'-- HD2-Addon: ')
         result[key] = payload
     return result
 
 
 def main():
-    rows = '--rows' in sys.argv
     build = Path(sys.argv[2]) if len(sys.argv)>2 else BUILD
-    components = load_components(rows)
-    name = 'Vanilla Plus Megapack Rows' if rows else 'Vanilla Plus Megapack'
+    components = load_components()
+    name = 'Vanilla Plus Megapack'
     slug = name.replace(' ', '')
     with zipfile.ZipFile(sys.argv[1]) as package:
         expected = {f'options/{c["slug"]}/{ARCHIVE}{s}' for c in components
                     for s in ('', '.stream', '.gpu_resources')}
-        expected |= {f'options/{c["slug"]}/{INPUT_ARCHIVE}{s}' for c in components if c.get('input_archive_sha256')
+        expected |= {f'options/{c["slug"]}/{MUSIC_ARCHIVE}{s}' for c in components if c.get('music_archive_sha256')
                      for s in ('', '.stream', '.gpu_resources')}
+        expected |= {f'images/{c["slug"]}.jpg' for c in components}
         expected |= {'manifest.json', 'thumbnail.png', slug+'-manifest.json', slug+'-README.txt'}
         assert len(package.namelist()) == len(expected) and set(package.namelist()) == expected
         manager = json.loads(package.read('manifest.json'))
-        assert manager['Version'] == 1 and manager['Name'] == name+f' - v{VERSION}' and manager['Guid'] == (ROWS_GUID if rows else GUID)
-        assert len(manager['Options']) == len(components) == 17
+        assert manager['Version'] == 1 and manager['Name'] == name+f' - v{VERSION}' and manager['Guid'] == GUID
+        assert len(manager['Options']) == len(components) == 25
         assert manager['IconPath'] == 'thumbnail.png'
         png = package.read('thumbnail.png')
         assert png[:8] == b'\x89PNG\r\n\x1a\n'
         width, height = struct.unpack_from('>II', png, 16)
         assert width == height and width >= 512
         report = json.loads(package.read(slug+'-manifest.json'))
-        assert report['revision'] == (ROWS_REVISION if rows else REVISION) and report['runtime_verified'] is False
+        assert report['revision'] == REVISION and report['runtime_verified'] is False
         assert report['requires'][0]['revision'] == 'loader-v18' and report['requires'][0]['api'] == 1
         assert len(report['requires']) == 1, 'Mod Bindings Menu is bundled, not a separate requirement'
         assert report['loader_bundled'] is False and report['boot_replaced'] is False
         assert len(report['components']) == len(components)
         for name, digest in report['files'].items():
             assert sha(package.read(name)) == digest
-        payloads, choices = {}, []
+        payloads, choices, images = {}, [], set()
         for component, option in zip(components, manager['Options']):
             folder = 'options/' + component['slug']
             assert option['Name'] == component['name']
             assert option['Description'] and option['Include'] == [folder]
-            assert option['Image'] == 'thumbnail.png' and 'SubOptions' not in option
-            choice = resources(package.read(folder + '/' + ARCHIVE))
-            assert set(choice) == {resource_hash(MODULE), resource_hash(component['module'])}
+            # Each option shows its own mod's cover, byte for byte the repository's, kept outside the Include folders.
+            assert option['Image'] == f'images/{component["slug"]}.jpg' and 'SubOptions' not in option
+            image = package.read(option['Image'])
+            assert image == (ROOT / 'assets/options' / (component['slug'] + '.jpg')).read_bytes()
+            assert jpeg_size(image) == (512, 512) and sha(image) not in images
+            images.add(sha(image))
+            choice = resources(package.read(folder + '/' + ARCHIVE), extras(component))
+            assert set(choice) == {resource_hash(MODULE), resource_hash(component['module'])} | extras(component)
             assert choice[resource_hash(MODULE)] == (build / 'entry.lua.main').read_bytes()
+            for name, digest in component.get('extra_resources', {}).items():
+                # Shipped beside the entry, byte for byte the standalone release's resource.
+                assert sha(choice[resource_hash(name)]) == digest
             for key, value in choice.items():
                 if key in payloads:
                     assert payloads[key] == value, 'Overlapping resources must be identical'
                 payloads[key] = value
             for suffix in ('.stream', '.gpu_resources'):
                 assert package.read(folder + '/' + ARCHIVE + suffix) == b''
-            if component.get('input_archive_sha256'):
-                # The bindings option also carries its input actions, byte for byte its standalone archive.
-                data = package.read(folder + '/' + INPUT_ARCHIVE)
-                assert sha(data) == component['input_archive_sha256']
-                extra = input_actions(data)
+            if component.get('music_archive_sha256'):
+                # The music option also carries its patched music_init, byte for byte its standalone archive.
+                data = package.read(folder + '/' + MUSIC_ARCHIVE)
+                assert sha(data) == component['music_archive_sha256']
+                extra = music_bank(data)
                 assert not set(extra) & set(payloads)
                 payloads.update(extra)
                 choice = {**choice, **extra}
                 for suffix in ('.stream', '.gpu_resources'):
-                    assert package.read(folder + '/' + INPUT_ARCHIVE + suffix) == b''
+                    assert package.read(folder + '/' + MUSIC_ARCHIVE + suffix) == b''
             choices.append(choice)
         # Checkbox combinations: none, all, each of at most two options or missing at most two, and 256
         # seeded random ones (tests/test_loader.lua's selections). No disabled feature may leak into an
@@ -107,12 +139,14 @@ def main():
                 if mask & (1 << i):
                     selected.update(choice)
                     wanted.add(resource_hash(component['module']))
-                    if component.get('input_archive_sha256'):
-                        wanted.add(INPUT)
+                    wanted |= extras(component)
+                    if component.get('music_archive_sha256'):
+                        wanted.add(MUSIC)
             if mask:
                 wanted.add(resource_hash(MODULE))
             assert set(selected) == wanted
-        assert set(payloads) == {resource_hash(c['module']) for c in components} | {resource_hash(MODULE), INPUT}
+        assert set(payloads) == ({resource_hash(c['module']) for c in components} | {resource_hash(MODULE), MUSIC}
+                                 | {key for c in components for key in extras(c)})
         for component in components:
             original = (build / component['slug'] / 'mod.lua.main').read_bytes()
             assert sha(original) == component['resource_sha256']
@@ -122,6 +156,9 @@ def main():
             if component.get('source'):
                 # Shipped verbatim: the pinned standalone source is the whole entry.
                 assert entry[8:] == (ROOT / 'components' / component['slug'] / component['source']).read_bytes()
+            if component.get('slug') in ASSEMBLED:
+                # Assembled by its own scripts/entry.py from src/ and locales/, byte for byte the standalone entry.
+                assert entry[8:] == (build / component['slug'] / 'entry.lua').read_bytes()
             assert entry == (build / component['slug'] / 'entry.lua.main').read_bytes()
             body = entry[8:]
             marker = ('-- HD2-Addon: ' + module + '\n').encode()
@@ -140,24 +177,16 @@ def main():
             bytecode = bytes(int(x) for x in re.findall(rb'\\([0-9]{3})', match[1]))
             original = (build / component['slug'] / 'mod.lua.main').read_bytes()
             assert bytecode == original[8:] and bytecode[:5] == b'\x1bLJ\x02\x02'
-        if rows:
-            with zipfile.ZipFile(sys.argv[sys.argv.index('--rows')+1]) as baseline:
-                original = {}
-                for component in components:
-                    original.update(resources(baseline.read('options/'+component['slug']+'/'+ARCHIVE)))
-                    if component.get('input_archive_sha256'):
-                        original.update(input_actions(baseline.read('options/'+component['slug']+'/'+INPUT_ARCHIVE)))
-            assert set(original) == set(payloads)
-            changed = {key for key in original if original[key] != payloads[key]}
-            assert changed == {resource_hash('mods/cowboybingus/enemy_intelligence')}
-            print(f'PASS: only the forecast payload differs from the standard v{VERSION} package')
-        assert [c['slug'] for c in components if c.get('input_archive_sha256')] == ['ModBindingsMenu']
+        # Mod Bindings Menu v2.3 adds its keyboard defaults while the game runs: no option replaces content/input.
+        assert INPUT not in payloads
+        assert not any(key in c for c in components for key in ('input_archive_sha256', 'input_config_sha256'))
+        assert [c['slug'] for c in components if c.get('music_archive_sha256')] == ['SoundSystemsRebalanced']
         assert resource_hash('boot') not in payloads
         assert resource_hash('core/wwise/lua/wwise_flow_callbacks') not in payloads
         for name in package.namelist():
             data = package.read(name).lower()
             assert b'users\\' not in data and b'users/' not in data
-    print(f'PASS: {len(components)} independent options, {len(masks)} of the {1 << len(components)} selections, exact pinned payloads, bindings input actions only in their option, no boot or shared loader')
+    print(f'PASS: {len(components)} independent options, {len(masks)} of the {1 << len(components)} selections, exact pinned payloads, the music bank only in its option, no content/input, no boot or shared loader')
 
 
 def selections(n):

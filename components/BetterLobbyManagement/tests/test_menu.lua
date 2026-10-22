@@ -141,6 +141,30 @@ end
 print('PASS: the dialog is filled once while hidden when our button has the focus; only a confirmed answer runs '
     .. 'the action; our text leaves the dialog before a native one')
 
+-- The addon's fresh start (a pause after an error below it): a dialog opened
+-- before it and answered while the mod did not run runs nothing; the focus
+-- sets the dialog up again and the next confirm runs the action.
+do
+    local world, menu, frame, ran = setup()
+    world.open_menu()
+    frame()
+    world.focus(4 + 3) -- promote
+    frame()
+    world.select(); frame() -- the game opened the dialog from our button
+    local counts = budget.wrap(world.api)
+    assert(next(budget.frame(counts, menu.reset)) == nil, 'reset reads nothing')
+    world.answer(true) -- confirmed during the pause
+    frame()
+    assert(#ran == 0, 'an answer given while the mod was paused runs nothing')
+    local setups = world.count('dialog_setup')
+    world.hide_dialog(); frame()
+    assert(world.count('dialog_setup') == setups + 1, 'the dialog is set up again for the focused button')
+    world.select(); frame()
+    world.answer(true); frame()
+    assert(#ran == 1 and ran[1] == 'promote', 'the next confirm runs the action')
+end
+print('PASS: after reset an answer given meanwhile runs nothing; the next confirm runs the action')
+
 -- Real-game timing: the dialog hides in the frame it is answered and fades out
 -- (state 3); a click can land on another of our buttons meanwhile, or in the
 -- same frame as the focus change. The dialog always shows the clicked button's
@@ -181,6 +205,29 @@ do
 end
 print('PASS: with the game\'s timing (hidden when answered, fading out) the dialog shows the clicked button\'s text '
     .. 'and a confirm runs that button\'s action')
+
+-- A mission's list (the host's types 2 and 3): a third action, type 7, gets
+-- its slot, its dialog and its confirm like the others; an offer without it
+-- has the game rebuild the list.
+do
+    local world, menu, frame, ran = setup({native_types = {2, 3}})
+    local offer, order = {cancel_sos = 'CANCEL SOS'}, {'cancel_sos'}
+    local dialogs = {cancel_sos = {title = 'CANCEL SOS', body = 'No more players join through your SOS.'}}
+    world.open_menu()
+    frame(offer, order, dialogs)
+    assert(world.our_buttons() == 'cancel_sos=CANCEL SOS' and world.bytes[world.content + M.TYPES + 2] == 7,
+        world.our_buttons())
+    world.focus(4 + 2)
+    frame(offer, order, dialogs)
+    assert(world.texts[world.dialog + M.DIALOG_TITLE] == 'CANCEL SOS')
+    world.select(); frame(offer, order, dialogs)
+    world.answer(true); frame(offer, order, dialogs)
+    assert(#ran == 1 and ran[1] == 'cancel_sos' and world.last_select == 7)
+    frame({}, {}, {})
+    assert(world.count('rebuild') == 1 and world.our_buttons() == '' and world.bytes[world.content + M.COUNT] == 2)
+end
+print('PASS: a mission\'s list takes a third action (type 7) after the game\'s two: slot, dialog and confirm; an offer '
+    .. 'without it has the game rebuild the list')
 
 -- Long labels scroll inside the button: the game's marquee at the button's width less the text inset.
 do

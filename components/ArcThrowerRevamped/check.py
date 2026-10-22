@@ -38,7 +38,7 @@ def check_luajit(lua, path):
 
 def check_bindings(lua, path):
     test = Path(__file__).parent / "tests" / "test_bindings.lua"
-    for scenario in ("clean", "predeclared", "game-present"):
+    for scenario in ("clean", "predeclared", "game-present", "sdk-declared", "other-build"):
         result = subprocess.run([str(lua), str(test), str(path), scenario],
                                 capture_output=True, text=True)
         if result.returncode != 0:
@@ -49,11 +49,19 @@ def check_bindings(lua, path):
 
 def check_work_budget(lua, path):
     test = Path(__file__).parent / "tests" / "test_work_budget.lua"
-    for scenario in ("normal", "slow", "stale"):
+    for scenario in ("normal", "slow", "stale", "budget"):
         result = subprocess.run([str(lua), str(test), str(path), scenario],
                                 capture_output=True, text=True)
         if result.returncode:
             raise SystemExit("Work-budget regression failed:\n" + result.stdout + result.stderr)
+        print(result.stdout.strip())
+    # The game build gate: on another build, or when the module files cannot be hashed, the addon
+    # makes no game-facing call at all.
+    for scenario in ("unsupported-build", "hash-unreadable"):
+        result = subprocess.run([str(lua), str(test), str(path), "budget", scenario],
+                                capture_output=True, text=True)
+        if result.returncode:
+            raise SystemExit("Build-gate regression failed:\n" + result.stdout + result.stderr)
         print(result.stdout.strip())
 
 
@@ -63,7 +71,10 @@ def check_recovery(lua, path):
                  "identity-gap", "holder-gap", "charge-binding-gap", "large-trigger-table",
                  "sparse-trigger-table", "dense-trigger-table",
                  "input-expired", "release-during-gap", "identity-change-during-gap",
-                 "holder-change-during-gap", "diagnostic-recovery")
+                 "holder-change-during-gap", "diagnostic-recovery", "entry-refused",
+                 "record-protection-refused", "record-not-private", "record-restore-failed",
+                 "update-error-pause", "update-errors-stop", "own-errors", "shutdown-restore",
+                 "entry-query-failed")
     for mode in ("normal", "slow"):
         for scenario in scenarios:
             result = subprocess.run([str(lua), str(test), str(path), mode, scenario],
@@ -71,6 +82,30 @@ def check_recovery(lua, path):
             if result.returncode:
                 raise SystemExit("Recovery regression failed:\n" + result.stdout + result.stderr)
     print("PASS: {} recovery/safety scenarios, including slow native reads".format(len(scenarios)*2))
+
+
+def check_equivalence(lua, path):
+    """The update against v1.7.1 (tests/reference), side by side, and its trace aborts."""
+    root = Path(__file__).parent
+    sys.path.insert(0, str(root / "scripts"))
+    from entry import entry_text
+    handle, reference = tempfile.mkstemp(suffix=".lua")
+    os.close(handle)
+    Path(reference).write_bytes(entry_text(addon=root / "tests" / "reference" / "arc_thrower_auto.lua"))
+    environment = dict(os.environ)
+    # jit.vmdef (abort reasons) lives beside the workspace LuaJIT binary.
+    environment["LUA_PATH"] = str(Path(lua).parent / "?.lua") + ";;"
+    try:
+        for mode in ("equivalence", "traces"):
+            arguments = [str(lua), str(root / "tests" / "test_equivalence.lua"), str(path), reference]
+            if mode == "traces":
+                arguments.append("traces")
+            result = subprocess.run(arguments, capture_output=True, text=True, env=environment)
+            if result.returncode:
+                raise SystemExit("Equivalence regression failed ({}):\n{}".format(mode, result.stdout + result.stderr))
+            print(result.stdout.strip())
+    finally:
+        os.unlink(reference)
 
 
 def archive_entry(archive):
@@ -88,11 +123,25 @@ def archive_entry(archive):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", default=str(Path(__file__).parent / "src"
-                                                / "arc_thrower_auto.lua"))
+    parser.add_argument("--source", help="an assembled entry (default: scripts/entry.py's, from src/)")
     parser.add_argument("--archive")
     arguments = parser.parse_args()
-    source = Path(arguments.source)
+    if arguments.source:
+        source = Path(arguments.source)
+    else:
+        sys.path.insert(0, str(Path(__file__).parent / "scripts"))
+        from entry import entry_text
+        handle, assembled = tempfile.mkstemp(suffix=".lua")
+        os.close(handle)
+        Path(assembled).write_bytes(entry_text())
+        try:
+            return check(Path(assembled), arguments)
+        finally:
+            os.unlink(assembled)
+    return check(source, arguments)
+
+
+def check(source, arguments):
     text = source.read_text(encoding="utf-8")
     if text.startswith("\ufeff") or "\0" in text:
         raise SystemExit("Entry must be plain UTF-8 Lua without a BOM")
@@ -114,6 +163,7 @@ def main():
     check_bindings(luajit, source)
     check_work_budget(luajit, source)
     check_recovery(luajit, source)
+    check_equivalence(luajit, source)
     if arguments.archive:
         body = archive_entry(arguments.archive)
         with tempfile.NamedTemporaryFile("wb", suffix=".lua", delete=False) as handle:
@@ -124,6 +174,7 @@ def main():
             check_bindings(luajit, temporary)
             check_work_budget(luajit, temporary)
             check_recovery(luajit, temporary)
+            check_equivalence(luajit, temporary)
         finally:
             os.unlink(temporary)
         print("packaged entry check ({}): ok".format(arguments.archive))

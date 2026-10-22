@@ -27,14 +27,32 @@ local entries = {KnowYourConstellation = 'install.lua', ArmoryPreviewCache = 'in
                  FlameDamageFixed = 'flame_damage_fixed.lua',
                  ModOptionsMenu = 'mod_options_menu.lua',
                  ModBindingsMenu = 'mod_bindings_menu.lua',
-                 BetterLobbyManagement = 'addon.lua'}
+                 BetterLobbyManagement = 'addon.lua',
+                 LaserSentryCooldown = 'laser_sentry_cooldown.lua',
+                 MatchYourColors = 'addon.lua',
+                 StickyGrenadeHandles = 'sticky_grenade_handles.lua',
+                 StratagemHeroExpanded = 'stratagem_hero_expanded.lua',
+                 SoundSystemsRebalanced = 'sound_systems_rebalanced.lua',
+                 FoliagePassThrough = 'foliage_pass_through.lua',
+                 HolsterYourShield = 'holster_your_shield.lua'}
+-- Laser Sentry Cooldown's, Match Your Colors', Sticky Grenade Handles', Stratagem Hero Expanded's, Sound Systems
+-- Rebalanced's, Foliage Pass-Through's and Holster Your Shield's guards are in their assembled entries; Hellpod Drop
+-- Hold's loader names the shared loader before its own guard, so all eight are named here.
 local guards = {ClickableScrollbars = 'ClickableScrollbars',
                 ArcThrowerRevamped = 'ArcThrowerRevampedInstalled',
                 GalacticMenuHotkey = 'GalacticMenuHotkeyInstalled',
                 FlameDamageFixed = 'FlameDamageFixedInstalled',
                 ModOptionsMenu = 'ModOptionsMenu',
                 ModBindingsMenu = 'ModBindingsMenu',
-                BetterLobbyManagement = 'BetterLobbyManagement'}
+                BetterLobbyManagement = 'BetterLobbyManagement',
+                HellpodDropHold = 'HellpodDropHold',
+                LaserSentryCooldown = 'LaserSentryCooldownInstalled',
+                MatchYourColors = 'MatchYourColorsInstalled',
+                StickyGrenadeHandles = 'StickyGrenadeHandles',
+                StratagemHeroExpanded = 'StratagemHeroExpanded',
+                SoundSystemsRebalanced = 'SoundSystemsRebalanced',
+                FoliagePassThrough = 'FoliagePassThrough',
+                HolsterYourShield = 'HolsterYourShieldInstalled'}
 for i = 4, #arg, 2 do
     local module, slug = arg[i], assert(arg[i + 1])
     local entry = entries[slug] or 'archive_loader.lua'
@@ -57,7 +75,15 @@ local registry_cannot_see = {['mods/cowboybingus/clickable_scrollbars'] = true,
                              ['mods/cowboybingus/flame_damage_fixed'] = true,
                              ['mods/cowboybingus/mod_options_menu'] = true,
                              ['mods/cowboybingus/mod_bindings_menu'] = true,
-                             ['mods/cowboybingus/better_lobby_management'] = true}
+                             ['mods/cowboybingus/better_lobby_management'] = true,
+                             ['mods/cowboybingus/hellpod_drop_hold'] = true,
+                             ['mods/cowboybingus/laser_sentry_cooldown'] = true,
+                             ['mods/cowboybingus/match_your_colors'] = true,
+                             ['mods/cowboybingus/sticky_grenade_handles'] = true,
+                             ['mods/cowboybingus/stratagem_hero_expanded'] = true,
+                             ['mods/cowboybingus/sound_systems_rebalanced'] = true,
+                             ['mods/cowboybingus/foliage_pass_through'] = true,
+                             ['mods/cowboybingus/holster_your_shield'] = true}
 -- The option selections to replay: every selection of at most two options, every one missing at most
 -- two, and 256 seeded pseudo-random ones. Interactions between options are pairwise, which the first two
 -- groups cover exactly; replaying all 2^n selections took minutes per build (65536 at sixteen options)

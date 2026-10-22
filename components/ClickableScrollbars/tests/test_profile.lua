@@ -6,6 +6,19 @@ package.path = (arg and arg[1] or '.') .. '/?.lua;' .. package.path
 rawset(_G, '__CLICKABLE_SCROLLBARS_TEST', true)
 local SOURCE = (arg and arg[2]) or 'ClickableScrollbars/src/clickable_scrollbars.lua'
 local module = assert(loadfile(SOURCE))()
+-- The legacy pixel detector is not shipped in the entry: load it from src/ beside the module.
+local function load_detector(target, environment)
+    local file = assert(io.open(((arg and arg[1]) or '.') .. '/src/detector.lua', 'rb'))
+    local chunk = assert(loadstring(file:read('*a'), '@detector.lua'))
+    file:close()
+    if environment then setfenv(chunk, environment) end
+    chunk(target, {clamp = function(value, low, high)
+        if value < low then return low end
+        if value > high then return high end
+        return value
+    end})
+end
+load_detector(module)
 
 local passed, failed = 0, 0
 local function check(name, condition, detail)
@@ -240,6 +253,8 @@ local function fake_platform(options)
 end
 
 local function boot(platform)
+    -- The known game build (test_frame_budget.lua runs the real build gate).
+    module.verify_build = function() return true end
     local environment = {update = function() end, shutdown = function() end,
                          CowboyBingusModLoader = {api = 1, open_log = function() return nil end}}
     local state = module.install(function() return platform end, environment)
@@ -418,11 +433,13 @@ sandbox.__CLICKABLE_SCROLLBARS_TEST = true
 local chunk = assert(loadstring(assert(io.open(SOURCE, 'rb')):read('*a'), '@' .. SOURCE))
 setfenv(chunk, sandbox)
 local sandboxed = chunk()
+load_detector(sandboxed, sandbox)
 assert(type(sandboxed) == 'table' and sandboxed.analyse, 'sandboxed module did not load')
 
 -- Exercise the paths that a press takes, inside the sandbox, with a fake
 -- platform, so any unknown global read anywhere in those paths is recorded.
 local sandbox_platform = fake_platform()
+sandboxed.verify_build = function() return true end -- the known game build
 local sandbox_environment = {update = function() end, shutdown = function() end,
                              CowboyBingusModLoader = {api = 1, open_log = function() return nil end}}
 local sandbox_state = sandboxed.install(function() return sandbox_platform end, sandbox_environment)
