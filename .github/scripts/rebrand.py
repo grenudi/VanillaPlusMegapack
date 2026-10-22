@@ -1,94 +1,163 @@
 #!/usr/bin/env python3
-"""Apply the MHGA (Make Helldivers Great Again) branding to upstream-owned files.
+"""Apply the pack's branding (branding.json) to upstream-owned prose and docstrings.
 
-Why a script and not a one-off find-and-replace: this fork follows
-CowboyBingus/VanillaPlusMegapack. Upstream keeps editing README.md and friends, so
-hand-edited copies would conflict on every sync. Instead the branding is a small
-set of deterministic, idempotent rules; the sync (upstream-sync.yml ->
-sync_merge.sh) takes upstream's version of any of these files on conflict and
-re-runs this script.
+Why a script and not a one-off find-and-replace: this fork follows CowboyBingus/VanillaPlusMegapack. Upstream
+keeps editing README.md and friends in its own brand, so hand-edited copies would conflict on every sync. The
+rules below are deterministic and idempotent; the sync (sync_merge.sh) takes upstream's version of any file
+listed here on conflict and re-runs this script.
 
-What is renamed: user-facing prose (README title/banner/alt text, INSTALL.txt title
-line, TRANSLATING.md, one art-script docstring).
+The name comes from branding.json; `previous` lists earlier brands (upstream's original first), so the same
+rules also work for a future rename. Only prose is rewritten. Identity (module id, GUID, resource names) is
+never touched; see docs/IDENTITY.md.
 
-What is deliberately NOT renamed (it is protocol or pinned bytes, not branding):
-  - `mods/cowboybingus/vanilla_plus_megapack` (module id the loader/game resolve),
-    the manifest `slug`/`name`, `src/megapack.lua` identity and the tests asserting them
-  - package file names (`Vanilla-Plus-Megapack-vN.zip`, `...-manifest.json`): upstream's builds
-  - everything under components/ (hash-pinned by components.lock.json) and the
-    root scripts/ that mirror them
-  - URLs and credits that point at upstream's real repository
-  - thumbnail.png (re-rendering needs the Windows fonts the original used)
+Vendored components/ files are pinned by components.lock.json. Only Python build scripts' docstrings are edited
+there, and the lock's source hashes for exactly those files are recomputed afterwards (`sync_lock`).
 
-    python rebrand.py           apply
-    python rebrand.py --check   exit 1 if anything would change (writes nothing)
+NEVER edit a component's Lua source (components/*/src/*): for plaintext ("direct") components the source text,
+comments included, IS the shipped resource, so even a comment change alters the package and fails the build's
+byte-for-byte check against the pinned standalone release. tests/test_branding.py enforces this.
+
+    python rebrand.py            apply
+    python rebrand.py --check    exit 1 if anything would change (writes nothing)
+    python rebrand.py --list     print every file this script may modify
 """
+import glob
+import hashlib
+import json
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-NAME = "Make Helldivers Great Again (MHGA)"
-UPSTREAM_URL = "https://github.com/CowboyBingus/VanillaPlusMegapack"
+sys.path.insert(0, str(ROOT / 'scripts'))
+import branding  # noqa: E402
 
-RULES = {
-    "README.md": [
-        (r"!\[Vanilla Plus Megapack\]\(assets/banner\.png\)", f"![{NAME}](assets/mhga/banner.png)"),
-        (r"(?m)^# Vanilla Plus Megapack$", f"# {NAME}"),
-    ],
-    "INSTALL.txt": [
-        (r"\AVanilla Plus Megapack( - v[\d.]+)", NAME + r"\1"),
-    ],
-    "TRANSLATING.md": [
-        (r"The Vanilla Plus Megapack repository", "The MHGA repository"),
-    ],
-    "assets/source/covers.py": [
-        (r"for the Vanilla Plus Megapack options", "for the MHGA options"),
-    ],
-}
+B = branding.load(ROOT)
+NAME, SHORT, STEM = B['name'], B['short_name'], B['artifact_stem']
+UPSTREAM_URL = 'https://github.com/CowboyBingus/VanillaPlusMegapack'
+PREVIOUS = [p for p in B.get('previous', []) if p['name'] != NAME]
+OLD_NAMES = [p['name'] for p in PREVIOUS]
+OLD_SHORTS = [p['short_name'] for p in PREVIOUS if p.get('short_name') and p['short_name'] != SHORT]
+OLD_STEMS = [p['artifact_stem'] for p in PREVIOUS if p['artifact_stem'] != STEM]
 
-NOTE_START, NOTE_END = "<!-- mhga-note:start -->", "<!-- mhga-note:end -->"
+
+def alt(values):
+    return '(?:' + '|'.join(re.escape(v) for v in sorted(values, key=len, reverse=True)) + ')'
+
+
+NAMES, ANY = alt(OLD_NAMES), alt(OLD_NAMES + OLD_SHORTS)
+STEMS = alt(OLD_STEMS)
+
+
+def split_name_rules():
+    """Names that a docstring wraps across a line ("The Vanilla Plus\\nMegapack repository's ...")."""
+    rules = []
+    for old in OLD_NAMES + OLD_SHORTS:
+        words = old.split(' ')
+        if len(words) > 1:
+            rules.append((rf"The {re.escape(' '.join(words[:-1]))}\r?\n{re.escape(words[-1])} repository's",
+                          f"The {SHORT}\nrepository's"))
+    return rules
+
+
+ZIP = (rf'{STEMS}-v(\d+)\.zip', rf'{STEM}-v\1.zip')   # `<stem>-v42.zip`; not `-Rows` and not the `vN` placeholder
+RULES = [
+    ('README.md', [
+        (rf'!\[{ANY}\]\(assets/(?:mhga/)?banner\.png\)', f'![{NAME}](assets/mhga/banner.png)'),
+        (rf'(?m)^# {ANY}$', f'# {NAME}'),
+        ZIP,
+    ]),
+    ('INSTALL.txt', [(rf'\A{ANY}( - v[\d.]+)', NAME + r'\1'), ZIP]),
+    ('CONTRIBUTING.md', [ZIP]),
+    ('TRANSLATING.md', [(rf'The {ANY} repository', f'The {SHORT} repository')]),
+    ('assets/source/covers.py', [(rf'for the {ANY} options', f'for the {SHORT} options')]),
+    # Vendored, lock-pinned: comments and docstrings only.
+    ('scripts/translations.py', None),
+    ('components/*/scripts/translations.py', None),
+    ('components/*/scripts/entry.py', [(rf'the {ANY} build', f'the {SHORT} build')]),
+]
+TRANSLATIONS = [*split_name_rules(), (rf"the {ANY}'s components", f"the {SHORT} pack's components")]
+
+NOTE_START, NOTE_END = '<!-- mhga-note:start -->', '<!-- mhga-note:end -->'
 NOTE = f"""{NOTE_START}
-> **MHGA** is an unofficial fork of [Vanilla Plus Megapack]({UPSTREAM_URL}) by CowboyBingus ([Zero-Clause BSD](LICENSE)). It follows upstream daily and adds semantic-versioned releases, CI and an optional AI-assisted review of each release.
+> **{SHORT}** is an unofficial fork of [Vanilla Plus Megapack]({UPSTREAM_URL}) by CowboyBingus ([Zero-Clause BSD](LICENSE)). It follows upstream daily and adds semantic-versioned releases, CI and an optional AI-assisted review of each release.
 >
-> Built packages are upstream's: download `Vanilla-Plus-Megapack-vN.zip` from [upstream's releases]({UPSTREAM_URL}/releases/latest). Package file names and the in-game module id (`mods/cowboybingus/vanilla_plus_megapack`) keep the upstream name on purpose, so the loader, mod managers and the game's resource names keep working.
+> This repository builds `{STEM}-vN.zip`. Nothing is published from it yet, so until then upstream's [`Vanilla-Plus-Megapack-vN.zip`]({UPSTREAM_URL}/releases/latest) carries the same mods. The display name lives in [`branding.json`](branding.json) and is not part of the package's identity: the module id (`mods/cowboybingus/vanilla_plus_megapack`) and GUID are fixed contracts with the loader and mod managers ([docs/IDENTITY.md](docs/IDENTITY.md)).
 {NOTE_END}"""
+
+
+def owned_files():
+    out = []
+    for pattern, _ in RULES:
+        out += sorted(Path(p).relative_to(ROOT).as_posix() for p in glob.glob(str(ROOT / pattern)))
+    return out
+
+
+def rules_for(rel):
+    for pattern, rules in RULES:
+        if rel in glob.glob(str(ROOT / pattern)) or (ROOT / rel).as_posix() in glob.glob(str(ROOT / pattern)):
+            return TRANSLATIONS if rules is None else rules
+    return []
 
 
 def apply_note(text):
     if NOTE_START in text and NOTE_END in text:
-        return re.sub(re.escape(NOTE_START) + r".*?" + re.escape(NOTE_END), lambda _: NOTE, text, count=1, flags=re.S)
-    title = re.search(rf"(?m)^# {re.escape(NAME)}$", text)
-    if not title:
-        return text
-    return text[: title.end()] + "\n\n" + NOTE + text[title.end():]
+        return re.sub(re.escape(NOTE_START) + r'.*?' + re.escape(NOTE_END), lambda _: NOTE, text, count=1, flags=re.S)
+    title = re.search(rf'(?m)^# {re.escape(NAME)}$', text)
+    return text if not title else text[: title.end()] + '\n\n' + NOTE + text[title.end():]
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest().upper()
+
+
+def sync_lock(apply):
+    """Pin the lock's source hash for each owned component file to the file's current bytes."""
+    path = ROOT / 'components.lock.json'
+    if not path.is_file():
+        return []
+    data = json.loads(path.read_text(encoding='utf-8'))
+    owned, updated = set(owned_files()), []
+    for entry in data:
+        for rel, old in entry['source_sha256'].items():
+            target = f"components/{entry['slug']}/{rel}"
+            if target in owned and (ROOT / target).is_file():
+                new = sha((ROOT / target).read_bytes())
+                if new != old:
+                    entry['source_sha256'][rel] = new
+                    updated.append(target)
+    if updated and apply:
+        path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
+    return updated
 
 
 def main():
-    check = "--check" in sys.argv
+    if '--list' in sys.argv:
+        print('\n'.join(owned_files() + ['components.lock.json']))
+        return 0
+    check = '--check' in sys.argv
     changed = []
-    for rel, rules in RULES.items():
+    for rel in owned_files():
         path = ROOT / rel
-        if not path.is_file():
-            print(f"skip (missing): {rel}")
-            continue
-        raw = path.read_bytes()
-        text = raw.decode("utf-8")
+        text = path.read_bytes().decode('utf-8')
         new = text
-        for pattern, repl in rules:
+        for pattern, repl in rules_for(rel):
             new = re.sub(pattern, repl, new)
-        if rel == "README.md":
+        if rel == 'README.md':
             new = apply_note(new)
         if new != text:
             changed.append(rel)
             if not check:
-                path.write_bytes(new.encode("utf-8"))
+                path.write_bytes(new.encode('utf-8'))
+    locked = sync_lock(apply=not check)
     for rel in changed:
-        print(("would change: " if check else "rebranded: ") + rel)
-    if not changed:
-        print("branding already applied")
-    return 1 if (check and changed) else 0
+        print(('would change: ' if check else 'rebranded: ') + rel)
+    for rel in locked:
+        print(('would re-pin: ' if check else 're-pinned in components.lock.json: ') + rel)
+    if not changed and not locked:
+        print('branding already applied')
+    return 1 if (check and (changed or locked)) else 0
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main())

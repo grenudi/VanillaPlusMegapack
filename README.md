@@ -23,12 +23,12 @@
 <!-- mhga-note:start -->
 > **MHGA** is an unofficial fork of [Vanilla Plus Megapack](https://github.com/CowboyBingus/VanillaPlusMegapack) by CowboyBingus ([Zero-Clause BSD](LICENSE)). It follows upstream daily and adds semantic-versioned releases, CI and an optional AI-assisted review of each release.
 >
-> Built packages are upstream's: download `Vanilla-Plus-Megapack-vN.zip` from [upstream's releases](https://github.com/CowboyBingus/VanillaPlusMegapack/releases/latest). Package file names and the in-game module id (`mods/cowboybingus/vanilla_plus_megapack`) keep the upstream name on purpose, so the loader, mod managers and the game's resource names keep working.
+> This repository builds `MHGA-vN.zip`. Nothing is published from it yet, so until then upstream's [`Vanilla-Plus-Megapack-vN.zip`](https://github.com/CowboyBingus/VanillaPlusMegapack/releases/latest) carries the same mods. The display name lives in [`branding.json`](branding.json) and is not part of the package's identity: the module id (`mods/cowboybingus/vanilla_plus_megapack`) and GUID are fixed contracts with the loader and mod managers ([docs/IDENTITY.md](docs/IDENTITY.md)).
 <!-- mhga-note:end -->
 
 Choose which of the twenty-five bundled CowboyBingus Helldivers 2 mods to enable in one install. The pack includes gameplay repairs, Ship Station Hotkeys, Clickable Scrollbars, Better Lobby Management's host tools, and the Mod Options Menu and Mod Bindings Menu tabs.
 
-**Requires the separately built Bingus Shared Loader v18 or newer (v19 is current).** Install two ZIPs: `Vanilla-Plus-Megapack-v42.zip` and `Bingus-Shared-Loader-v19.zip`. Mod managers do not install the dependency automatically.
+**Requires the separately built Bingus Shared Loader v18 or newer (v19 is current).** Install two ZIPs: `MHGA-v42.zip` and `Bingus-Shared-Loader-v19.zip`. Mod managers do not install the dependency automatically.
 
 The Rows package ended with v35: Know Your Constellation v4 has a single layout. If you used `Vanilla-Plus-Megapack-Rows`, disable it and enable this pack.
 
@@ -36,7 +36,7 @@ The Rows package ended with v35: Know Your Constellation v4 has a single layout.
 
 1. Close Helldivers 2. Use one mod manager.
 2. Replace any previous loader entry with v18. Disable old megapacks and standalone copies of features you want turned off.
-3. Import `Vanilla-Plus-Megapack-v42.zip` and `Bingus-Shared-Loader-v19.zip`, then enable both.
+3. Import `MHGA-v42.zip` and `Bingus-Shared-Loader-v19.zip`, then enable both.
 4. With Arsenal's default priority, put **Bingus Shared Loader last**, at the bottom. If first-mod priority is enabled, put the loader first.
 5. Open the Megapack's **Options** (sliders button) in Arsenal, or its mod options in HD2MM. Check each mod you want and uncheck each mod you do not want. Confirm/save the selection.
 6. **Purge / Deploy**, then launch the game normally. Close the game and repeat these steps whenever you change options.
