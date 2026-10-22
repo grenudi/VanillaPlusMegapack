@@ -238,7 +238,8 @@ for _, scenario in ipairs(scenarios) do
             end
             local identity = env.CowboyBingusModLoader.megapack
             if installed_pack and failure ~= 1 and failure ~= #names + 1 then
-                assert(identity.name == 'Vanilla Plus Megapack' and identity.revision == 'megapack-v42')
+                local expected = assert(io.open(build .. '/pack-name.txt', 'rb')); local pack_name = expected:read('*a'); expected:close()
+                assert(identity.name == pack_name and identity.revision == 'megapack-v42')
                 -- A loader that manages the LuaJIT cache (v18+) sets loader.jit; the pack then leaves it alone.
                 local managed = env.CowboyBingusModLoader.jit and env.CowboyBingusModLoader.jit.managed
                 assert((identity.jit_fallback == nil) == (managed == true))

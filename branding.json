@@ -1,0 +1,8 @@
+{
+  "name": "Make Helldivers Great Again (MHGA)",
+  "short_name": "MHGA",
+  "artifact_stem": "MHGA",
+  "previous": [
+    {"name": "Vanilla Plus Megapack", "artifact_stem": "Vanilla-Plus-Megapack"}
+  ]
+}
