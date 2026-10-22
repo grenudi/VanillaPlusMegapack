@@ -1,3 +1,21 @@
+<!-- forks:start -->
+
+**Forks of [CowboyBingus/VanillaPlusMegapack](https://github.com/CowboyBingus/VanillaPlusMegapack) and their latest releases** (auto-updated daily)
+
+| Repo | Latest release | Released | Last push |
+|---|---|---|---|
+| [CowboyBingus/VanillaPlusMegapack](https://github.com/CowboyBingus/VanillaPlusMegapack) (upstream) | ![release: v42](https://img.shields.io/badge/release-v42-blue) | ![released: 2026-10-12](https://img.shields.io/badge/released-2026--10--12-blue) | ![pushed: 2026-10-20](https://img.shields.io/badge/pushed-2026--10--20-informational) |
+| [grenudi/VanillaPlusMegapack](https://github.com/grenudi/VanillaPlusMegapack) (this fork) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-22](https://img.shields.io/badge/pushed-2026--10--22-informational) |
+| [cancan23333/VanillaPlusMegapack](https://github.com/cancan23333/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-20](https://img.shields.io/badge/pushed-2026--10--20-informational) |
+| [LifeLikeLemon/VanillaPlusMegapack](https://github.com/LifeLikeLemon/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-12](https://img.shields.io/badge/pushed-2026--10--12-informational) |
+| [huangggg5853/VanillaPlusMegapack](https://github.com/huangggg5853/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-12](https://img.shields.io/badge/pushed-2026--10--12-informational) |
+| [Singularia/VanillaPlusMegapack](https://github.com/Singularia/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-06](https://img.shields.io/badge/pushed-2026--10--06-informational) |
+| [WangziQAQ/VanillaPlusMegapack](https://github.com/WangziQAQ/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-01](https://img.shields.io/badge/pushed-2026--10--01-informational) |
+| [HWG90/VanillaPlusMegapack](https://github.com/HWG90/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-09-30](https://img.shields.io/badge/pushed-2026--09--30-informational) |
+| [jianbingchengwang/VanillaPlusMegapack](https://github.com/jianbingchengwang/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-09-24](https://img.shields.io/badge/pushed-2026--09--24-informational) |
+
+<!-- forks:end -->
+
 ![Vanilla Plus Megapack](assets/banner.png)
 
 # Vanilla Plus Megapack
