@@ -71,6 +71,41 @@ jobs:
           if [ "$code" -ge 2 ]; then exit 1; fi
           exit 0
 
+  identity-and-branding:
+    name: Identity is not tied to the name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Branding is display-only (identity is pinned and never derived from the name)
+        run: python3 tests/test_branding.py -v
+      - name: Branding is applied everywhere it should be
+        run: python3 .github/scripts/rebrand.py --check
+
+  components-reproduce:
+    name: Components reproduce upstream's pinned resources
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read pinned LuaJIT commit
+        id: pin
+        run: echo "commit=$(python3 -c "import json;print(json.load(open('dependencies.json'))['dependencies'][0]['commit'])")" >> "$GITHUB_OUTPUT"
+      - name: Cache LuaJIT (non-GC64)
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: tools/luajit-src
+          key: luajit-linux-nogc64-${{ steps.pin.outputs.commit }}
+      - name: Build the pinned LuaJIT, non-GC64 (same bytecode as msvcbuild.bat nogc64)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/LuaJIT/LuaJIT.git tools/luajit-src
+          git -C tools/luajit-src checkout ${{ steps.pin.outputs.commit }}
+          make -C tools/luajit-src -j"$(nproc)" XCFLAGS=-DLUAJIT_DISABLE_GC64
+      - name: Compile all components and compare with the pinned hashes
+        env:
+          HD2_LUAJIT: ${{ github.workspace }}/tools/luajit-src/src/luajit
+        run: python3 .github/scripts/verify_components.py
+
   json-validity:
     name: JSON validity
     runs-on: ubuntu-latest
