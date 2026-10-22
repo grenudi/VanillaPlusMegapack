@@ -6,7 +6,7 @@ import struct
 import sys
 import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from build import ARCHIVE, ASSEMBLED, BUILD, GUID, MODULE, MUSIC_ARCHIVE, VERSION, REVISION, ROOT, load_components, resource_hash, sha
+from build import ARCHIVE, ASSEMBLED, BRANDING, BUILD, GUID, MODULE, MUSIC_ARCHIVE, VERSION, REVISION, ROOT, load_components, resource_hash, sha
 
 INPUT = resource_hash('content/input')  # the game's input configuration: no option ships it
 MUSIC, BANK = resource_hash('content/audio/music_init'), resource_hash('wwise_bank')
@@ -69,8 +69,7 @@ def resources(data, compiled=frozenset()):
 def main():
     build = Path(sys.argv[2]) if len(sys.argv)>2 else BUILD
     components = load_components()
-    name = 'Vanilla Plus Megapack'
-    slug = name.replace(' ', '')
+    name, slug = BRANDING['name'], BRANDING['artifact_stem']
     with zipfile.ZipFile(sys.argv[1]) as package:
         expected = {f'options/{c["slug"]}/{ARCHIVE}{s}' for c in components
                     for s in ('', '.stream', '.gpu_resources')}

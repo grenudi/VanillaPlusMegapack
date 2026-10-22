@@ -9,10 +9,16 @@ import sys
 
 sys.dont_write_bytecode = True
 from archive import ARCHIVE, LUA, EXE_SHA, GAME_DLL_SHA, make_archive, resource_hash, sha
+from branding import load as load_branding, render_identity
 from package import package_release
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / 'build'
+# Display name and file-name stem: the only place the pack's name enters the build (branding.json).
+BRANDING = load_branding(ROOT)
+# IDENTITY: fixed contracts, never derived from the name above (docs/IDENTITY.md). MODULE is hashed into the
+# game's resource ids and listed by the loader; GUID is what the mod managers key the pack on. tests/test_branding.py
+# pins both and checks they are plain constants.
 MODULE = 'mods/cowboybingus/vanilla_plus_megapack'
 VERSION = '42'
 REVISION = f'megapack-v{VERSION}'
@@ -258,12 +264,15 @@ def main():
                         help='Also run the interactive desktop capture (otherwise recorded as unverified)')
     args = parser.parse_args()
     build = BUILD
+    build.mkdir(parents=True, exist_ok=True)
+    # The identity module's expected display name, for tests/test_loader.lua (which takes only build + loader).
+    (build / 'pack-name.txt').write_text(BRANDING['name'], encoding='utf-8')
     components = load_components()
     if not components or len({c['module'] for c in components}) != len(components):
         raise ValueError('Expected distinct gameplay components')
     resources = {resource_hash(c['module']): build_component(c, build) for c in components}
     resources[resource_hash(MODULE)] = compile_resource(
-        (ROOT / 'src/megapack.lua').read_text(encoding='utf-8'), build)
+        render_identity((ROOT / 'src/megapack.lua').read_text(encoding='utf-8'), BRANDING), build)
     def entry(component):
         resource = resources[resource_hash(component['module'])]
         if component.get('entry') == 'direct':
@@ -311,7 +320,7 @@ def main():
         options.append({'Name': component['name'], 'Description': OPTION_DESCRIPTIONS[component['slug']],
                         'Include': [folder], 'Image': 'images/' + component['slug'] + '.jpg'})
     report = {
-        'name': 'Vanilla Plus Megapack', 'slug': 'VanillaPlusMegapack', 'revision': REVISION, 'guid': GUID,
+        'name': BRANDING['name'], 'artifact_stem': BRANDING['artifact_stem'], 'revision': REVISION, 'guid': GUID,
         'description': 'Choose any of the twenty-five bundled mods in this pack\'s Options menu in Arsenal or HD2MM. Requires the separate Bingus Shared Loader v18. Disable standalone copies of features you want turned off. Close the game, select your options, then Purge / Deploy. With default Arsenal priority put the loader last.',
         'requires': [{'name': 'Bingus Shared Loader', 'guid': '612eaf70-d682-43c7-9efd-16dcc695f977', 'api': 1, 'revision': 'loader-v18'}],
         'game_exe_sha256': EXE_SHA, 'game_dll_sha256': GAME_DLL_SHA,
