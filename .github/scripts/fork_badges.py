@@ -53,18 +53,22 @@ def main():
     for r in repos:
         if not r:
             continue
-        rels = [x for x in (api(f"/repos/{r['full_name']}/releases?per_page=5") or []) if not x.get("draft")]
+        all_rels = [x for x in (api(f"/repos/{r['full_name']}/releases?per_page=20") or []) if not x.get("draft")]
+        # upstream-sync.yml mirrors upstream's release notes onto the fork stamped with the
+        # mirroring time; those are copies, not this repo's own releases, so skip them.
+        rels = [x for x in all_rels if "Mirrored from https://github.com/" not in (x.get("body") or "")]
+        mirrors = len(all_rels) - len(rels)
         rel = rels[0] if rels else None
         rdate = parse(rel["published_at"]) if rel else None
-        rows.append((rdate, parse(r["pushed_at"]), r, rel))
+        rows.append((rdate, parse(r["pushed_at"]), r, rel, mirrors))
     floor = datetime.min.replace(tzinfo=timezone.utc)
     rows.sort(key=lambda t: (t[0] or floor, t[1] or floor), reverse=True)
 
     lines = [START, "", f"**Forks of [{UPSTREAM}](https://github.com/{UPSTREAM}) and their latest releases** (auto-updated daily)", "",
              "| Repo | Latest release | Released | Last push |", "|---|---|---|---|"]
-    for rdate, pushed, r, rel in rows:
+    for rdate, pushed, r, rel, mirrors in rows:
         fresh = rdate and (now - rdate).total_seconds() < 48 * 3600
-        tag = badge("release", rel["tag_name"], "brightgreen" if fresh else "blue") if rel else badge("release", "none", "lightgrey")
+        tag = badge("release", rel["tag_name"], "brightgreen" if fresh else "blue") if rel else badge("release", "mirrors upstream" if mirrors else "none", "lightgrey")
         when = badge("released", f"{rdate:%Y-%m-%d}", "brightgreen" if fresh else "blue") if rdate else badge("released", "never", "lightgrey")
         push = badge("pushed", f"{pushed:%Y-%m-%d}", "informational") if pushed else ""
         mark = " (upstream)" if r["full_name"] == UPSTREAM else (" (this fork)" if r["full_name"] == os.environ.get("GITHUB_REPOSITORY") else "")
