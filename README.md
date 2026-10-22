@@ -4,7 +4,7 @@
 
 | Repo | Latest release | Released | Last push |
 |---|---|---|---|
-| [grenudi/mhga](https://github.com/grenudi/mhga) (this fork) 🆕 | ![release: v42.0.1](https://img.shields.io/badge/release-v42.0.1-brightgreen) | ![released: 2026-10-22](https://img.shields.io/badge/released-2026--10--22-brightgreen) | ![pushed: 2026-10-22](https://img.shields.io/badge/pushed-2026--10--22-informational) |
+| [make-helldivers-great-again/mhga](https://github.com/make-helldivers-great-again/mhga) (this fork) 🆕 | ![release: v42.0.1](https://img.shields.io/badge/release-v42.0.1-brightgreen) | ![released: 2026-10-22](https://img.shields.io/badge/released-2026--10--22-brightgreen) | ![pushed: 2026-10-22](https://img.shields.io/badge/pushed-2026--10--22-informational) |
 | [CowboyBingus/VanillaPlusMegapack](https://github.com/CowboyBingus/VanillaPlusMegapack) (upstream) | ![release: v42](https://img.shields.io/badge/release-v42-blue) | ![released: 2026-10-12](https://img.shields.io/badge/released-2026--10--12-blue) | ![pushed: 2026-10-20](https://img.shields.io/badge/pushed-2026--10--20-informational) |
 | [cancan23333/VanillaPlusMegapack](https://github.com/cancan23333/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-20](https://img.shields.io/badge/pushed-2026--10--20-informational) |
 | [LifeLikeLemon/VanillaPlusMegapack](https://github.com/LifeLikeLemon/VanillaPlusMegapack) | ![release: none](https://img.shields.io/badge/release-none-lightgrey) | ![released: never](https://img.shields.io/badge/released-never-lightgrey) | ![pushed: 2026-10-12](https://img.shields.io/badge/pushed-2026--10--12-informational) |
