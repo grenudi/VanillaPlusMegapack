@@ -1,4 +1,4 @@
-"""Square covers (1254x1254) for the Vanilla Plus Megapack options whose mods had no code-drawn cover.
+"""Square covers (1254x1254) for the MHGA options whose mods had no code-drawn cover.
 
     python covers.py [out folder] [Slug ...]     (default: ../covers, every cover)
 

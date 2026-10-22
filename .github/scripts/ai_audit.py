@@ -32,7 +32,7 @@ DEFAULT_MODELS = {
 # changelog/release note, not an internal review thread, so it needs to be
 # skimmable and it needs a predictable heading shape for insert_audit.py to
 # find and replace on the next run.
-PROMPT_TEMPLATE = """You are reviewing a source diff for VanillaPlusMegapack, an open-source \
+PROMPT_TEMPLATE = """You are reviewing a source diff for MHGA (Make Helldivers Great Again, a fork of CowboyBingus/VanillaPlusMegapack), an open-source \
 Helldivers 2 cosmetic/quality-of-life mod pack (Lua/LuaJIT, with Python build tooling). \
 The mods legitimately read and write specific, documented locations in the game's own \
 process via Windows FFI (ReadProcessMemory/WriteProcessMemory, GetAsyncKeyState, SendInput, \

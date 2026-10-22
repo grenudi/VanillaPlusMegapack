@@ -16,9 +16,15 @@
 
 <!-- forks:end -->
 
-![Vanilla Plus Megapack](assets/banner.png)
+![Make Helldivers Great Again (MHGA)](assets/mhga/banner.png)
 
-# Vanilla Plus Megapack
+# Make Helldivers Great Again (MHGA)
+
+<!-- mhga-note:start -->
+> **MHGA** is an unofficial fork of [Vanilla Plus Megapack](https://github.com/CowboyBingus/VanillaPlusMegapack) by CowboyBingus ([Zero-Clause BSD](LICENSE)). It follows upstream daily and adds semantic-versioned releases, CI and an optional AI-assisted review of each release.
+>
+> Built packages are upstream's: download `Vanilla-Plus-Megapack-vN.zip` from [upstream's releases](https://github.com/CowboyBingus/VanillaPlusMegapack/releases/latest). Package file names and the in-game module id (`mods/cowboybingus/vanilla_plus_megapack`) keep the upstream name on purpose, so the loader, mod managers and the game's resource names keep working.
+<!-- mhga-note:end -->
 
 Choose which of the twenty-five bundled CowboyBingus Helldivers 2 mods to enable in one install. The pack includes gameplay repairs, Ship Station Hotkeys, Clickable Scrollbars, Better Lobby Management's host tools, and the Mod Options Menu and Mod Bindings Menu tabs.
 
