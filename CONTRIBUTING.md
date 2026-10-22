@@ -7,7 +7,7 @@ $env:HD2_LUAJIT = (Resolve-Path 'tools/LuaJIT/src/luajit.exe').Path
 python -B scripts/build.py
 ```
 
-The output is the workspace root `releases/Vanilla-Plus-Megapack-v38.zip` (or local `releases/` when built standalone). Generated wrappers, component bytecode, checksums and test reports stay in ignored `build/`. The build does not install mods, access a live game process, or launch the game.
+The output is the workspace root `releases/MHGA-v38.zip` (or local `releases/` when built standalone). Generated wrappers, component bytecode, checksums and test reports stay in ignored `build/`. The build does not install mods, access a live game process, or launch the game.
 
 Gameplay sources are vendored. Build Bingus Shared Loader first. its compiled fixtures are used by the startup integration gate. For standalone checkouts, set `HD2_SHARED_LOADER_BUILD` to the loader build directory. The compiled modules retain their existing runtime game-fingerprint checks.
 
@@ -34,8 +34,8 @@ For future component updates, import the reviewed source/tests, rebuild the stan
 These harnesses require local copies of the managers, use unique fixture directories under `build/`, and never use the live library or game installation. Supply an extracted Arsenal 0.36.0 application directory containing `obfuscated_src/main` and its Node dependencies; supply an HD2MM application directory containing `Helldivers2ModManager.dll` and its dependencies.
 
 ```powershell
-node tests/test_arsenal.cjs ../releases/Vanilla-Plus-Megapack-v36.zip fixtures/arsenal build/arsenal-options
-dotnet run --project tests/hd2mm/Harness.csproj -c Release -- fixtures/hd2mm ../releases/Vanilla-Plus-Megapack-v36.zip build/hd2mm-options
+node tests/test_arsenal.cjs ../releases/MHGA-v36.zip fixtures/arsenal build/arsenal-options
+dotnet run --project tests/hd2mm/Harness.csproj -c Release -- fixtures/hd2mm ../releases/MHGA-v36.zip build/hd2mm-options
 ```
 
 The HD2MM harness targets .NET 9 Windows/WPF and uses no external NuGet packages. Each backend checks every subset of the twenty-five options, every deployed archive byte for byte (the Mod Bindings Menu and Sound Systems Rebalanced options deploy two), empty selection, purge, disable/re-enable and removal. JSON reports record the exact release checksum and manager version. Manager defaults are observed, not forced by the manifest.

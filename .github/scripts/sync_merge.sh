@@ -3,11 +3,13 @@
 # Writes result=clean|conflict to $GITHUB_OUTPUT (and stdout).
 #
 # A conflict is auto-resolved ONLY when every conflicted file is one the branding
-# script owns (see .github/scripts/rebrand.py): for those, upstream's version is taken
-# and the branding is re-applied on top. Any other conflict aborts the merge untouched
+# script owns (see .github/scripts/rebrand.py --list): for those, upstream's version is taken
+# and the branding is re-applied on top (which also re-pins components.lock.json for the
+# vendored files it edited). Any other conflict aborts the merge untouched
 # so a human resolves it (the workflow then opens an issue).
 set -u
-BRAND_FILES=" README.md INSTALL.txt TRANSLATING.md assets/source/covers.py "
+# Files the branding script owns (it is the single source of truth for this list), plus the lock it re-pins.
+BRAND_FILES=" $(python3 .github/scripts/rebrand.py --list | tr '\n' ' ') "
 emit() { echo "result=$1"; [ -n "${GITHUB_OUTPUT:-}" ] && echo "result=$1" >> "$GITHUB_OUTPUT"; return 0; }
 
 if ! git merge --no-ff upstream/main -m "merge: sync with upstream ${UPSTREAM:-upstream} main"; then

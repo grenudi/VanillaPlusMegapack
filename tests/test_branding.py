@@ -145,5 +145,24 @@ class PackagingIndependence(unittest.TestCase):
                     self.assertEqual(p1.get(key), p2.get(key), key)
 
 
+class RebrandScope(unittest.TestCase):
+    """The rebrand script may only edit prose, never anything that ships."""
+
+    def test_never_touches_component_lua_sources(self):
+        # For plaintext ("direct") components the Lua source, comments included, is the shipped resource.
+        sys.path.insert(0, str(ROOT / '.github/scripts'))
+        import rebrand
+        for rel in rebrand.owned_files():
+            self.assertFalse(re.match(r'components/[^/]+/src/', rel), f'{rel}: component Lua sources must not be edited')
+            self.assertFalse(rel.endswith('.lua'), f'{rel}: no Lua file may be rebranded')
+
+    def test_rules_never_mention_identity(self):
+        import rebrand
+        for _, rules in rebrand.RULES:
+            for pattern, repl in rules or []:
+                self.assertNotIn('vanilla_plus_megapack', pattern + repl)
+                self.assertNotIn('876060ae', pattern + repl)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
