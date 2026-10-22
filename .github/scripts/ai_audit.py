@@ -5,7 +5,7 @@ Used by .github/workflows/ai-audit.yml, which only invokes this on
 release-please's own release PRs. Supports two providers - whichever repo
 secret is configured wins (Anthropic checked first):
 
-    ANTHROPIC_API_KEY   -> Claude (default model: claude-sonnet-4-5)
+    ANTHROPIC_API_KEY   -> Claude (default model: claude-sonnet-5-5)
     OPENAI_API_KEY      -> GPT    (default model: gpt-4o)
 
 Either default can be overridden without touching this file via the
@@ -24,7 +24,7 @@ import urllib.error
 import urllib.request
 
 DEFAULT_MODELS = {
-    "anthropic": "claude-sonnet-4-5",
+    "anthropic": "claude-sonnet-5-5",
     "openai": "gpt-4o",
 }
 

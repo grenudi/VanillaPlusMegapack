@@ -1,7 +1,7 @@
 name: Sync with upstream
 
 # This fork follows CowboyBingus/VanillaPlusMegapack. Daily (and on demand) it
-# merges upstream's main into this fork's main and mirrors new upstream tags.
+# merges upstream's main into this fork's main and copies upstream tags.
 # A clean merge is pushed straight through; a conflicting one is NOT pushed -
 # an issue is opened instead so the conflict gets resolved by hand.
 #
@@ -65,15 +65,3 @@ jobs:
               --body "Merging \`${UPSTREAM}\` main into this fork conflicts. Resolve locally: \`git fetch upstream && git merge upstream/main\`, fix the conflicts, push. This issue is opened once and left alone until closed."
           fi
           exit 1
-
-      - name: Mirror new upstream releases (notes only, no assets)
-        if: steps.merge.outputs.result != 'conflict'
-        run: |
-          gh release list --repo "$UPSTREAM" --limit 10 --json tagName,name,isPrerelease --jq '.[] | [.tagName,.name,.isPrerelease] | @tsv' | while IFS=$'\t' read -r tag name pre; do
-            if ! gh release view "$tag" --repo "${{ github.repository }}" >/dev/null 2>&1 && git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-              body=$(gh release view "$tag" --repo "$UPSTREAM" --json body --jq .body)
-              printf '%s\n\n---\nMirrored from https://github.com/%s/releases/tag/%s (notes only; download packages from the upstream release).\n' "$body" "$UPSTREAM" "$tag" > /tmp/notes.md
-              flags=""; [ "$pre" = "true" ] && flags="--prerelease"
-              gh release create "$tag" --repo "${{ github.repository }}" --title "${name:-$tag}" --notes-file /tmp/notes.md $flags --verify-tag
-            fi
-          done

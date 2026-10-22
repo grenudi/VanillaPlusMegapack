@@ -86,11 +86,29 @@ def gh_api(method, url, token, data=None):
         return json.load(resp)
 
 
+# release-please's PR body is "<header>\n---\n\n<release notes>\n\n---\nThis PR was
+# generated with Release Please..." and it publishes the part before that footer
+# as the GitHub Release notes, so the audit has to go inside it, not after it.
+PR_FOOTER = re.compile(r"\n+---\nThis PR was generated with")
+
+
+def merge_into_pr_body(body, audit_md):
+    """Return `body` with the managed audit block replaced, or inserted just
+    above release-please's footer (appended if there is no footer)."""
+    managed = f"{START}\n{audit_md.strip()}\n{END}"
+    if START in body and END in body:
+        return upsert_block(body, audit_md)
+    footer = PR_FOOTER.search(body)
+    if footer:
+        return body[:footer.start()].rstrip() + "\n\n" + managed + "\n" + body[footer.start():]
+    return (body.rstrip() + "\n\n" if body.strip() else "") + managed + "\n"
+
+
 def update_pr_body(repo, pr_number, token, audit_md):
     url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
     current = gh_api("GET", url, token)
     body = current.get("body") or ""
-    new_body = upsert_block(body, audit_md)
+    new_body = merge_into_pr_body(body, audit_md)
     if new_body == body:
         print("PR body already up to date")
         return
@@ -98,9 +116,8 @@ def update_pr_body(repo, pr_number, token, audit_md):
         gh_api("PATCH", url, token, {"body": new_body})
         print("PR body updated")
     except urllib.error.HTTPError as e:
-        # Non-fatal: the CHANGELOG.md copy (committed to the branch, part of
-        # the PR diff either way) is the durable record even if this call
-        # fails for some reason.
+        # Non-fatal: the changelog copy (committed to the release branch, part of
+        # the PR diff either way) is the durable record even if this call fails.
         print(f"Could not update PR body ({e.code}): {e.read().decode(errors='replace')[:300]}",
               file=sys.stderr)
 
