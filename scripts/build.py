@@ -320,7 +320,8 @@ def main():
         options.append({'Name': component['name'], 'Description': OPTION_DESCRIPTIONS[component['slug']],
                         'Include': [folder], 'Image': 'images/' + component['slug'] + '.jpg'})
     report = {
-        'name': BRANDING['name'], 'artifact_stem': BRANDING['artifact_stem'], 'revision': REVISION, 'guid': GUID,
+        'name': BRANDING['name'], 'artifact_stem': BRANDING['artifact_stem'], 'icon': BRANDING.get('icon', 'assets/thumbnail.png'),
+        'revision': REVISION, 'guid': GUID,
         'description': 'Choose any of the twenty-five bundled mods in this pack\'s Options menu in Arsenal or HD2MM. Requires the separate Bingus Shared Loader v18. Disable standalone copies of features you want turned off. Close the game, select your options, then Purge / Deploy. With default Arsenal priority put the loader last.',
         'requires': [{'name': 'Bingus Shared Loader', 'guid': '612eaf70-d682-43c7-9efd-16dcc695f977', 'api': 1, 'revision': 'loader-v18'}],
         'game_exe_sha256': EXE_SHA, 'game_dll_sha256': GAME_DLL_SHA,

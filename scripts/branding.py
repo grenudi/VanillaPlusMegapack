@@ -7,6 +7,7 @@ never computed from a name. Renaming the pack means editing branding.json and no
     name           shown in the mod manager, in the identity module's `name` field and in docs
     short_name     used in prose
     artifact_stem  file-name stem: <stem>-vN.zip, <stem>-manifest.json, <stem>-README.txt
+    icon           (optional) the pack's box icon, a PNG under assets/; packaged as thumbnail.png
     previous       earlier brands, so .github/scripts/rebrand.py can rewrite docs that still use them
 """
 import json
@@ -18,6 +19,7 @@ PLACEHOLDER = '@PACK_NAME@'
 # The name goes inside a single-quoted Lua literal and a JSON string: no quotes, backslashes or control characters.
 NAME = re.compile(r"[^\x00-\x1f\x7f'\"\\]{1,64}")
 STEM = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]{0,47}')
+ICON = re.compile(r'assets/(?:[A-Za-z0-9_-][A-Za-z0-9._-]*/)*[A-Za-z0-9_-][A-Za-z0-9._-]*\.png')
 
 
 def validate(branding):
@@ -27,6 +29,9 @@ def validate(branding):
         value = branding.get(key)
         if not isinstance(value, str) or not pattern.fullmatch(value) or value != value.strip():
             raise ValueError(f'branding.json: invalid {key}: {value!r}')
+    icon = branding.get('icon')
+    if icon is not None and (not isinstance(icon, str) or not ICON.fullmatch(icon) or '..' in icon):
+        raise ValueError(f'branding.json: invalid icon: {icon!r}')
     if len(branding['short_name']) > 16:
         raise ValueError('branding.json: short_name is longer than 16 characters')
     for old in branding.get('previous', []):

@@ -16,6 +16,12 @@ The footer is `--footer "..."`; by default it credits the upstream project.
 Fonts in `fonts/` are SIL Open Font License: Archivo Black (title, squeezed horizontally to 80%) and
 Barlow Condensed SemiBold (footer). License texts are alongside.
 
-Not changed: `../thumbnail.png`, the pack's box icon in Arsenal/HD2MM, still reads VANILLA PLUS / MEGAPACK.
-Upstream draws it with Windows fonts (Franklin Gothic Heavy, Bahnschrift) that are not available on
-non-Windows machines, so it is left as is rather than re-rendered with different type.
+## Box icon
+
+`thumbnail.png` (1254x1254) is the pack's image in Arsenal and HD2MM, selected by `icon` in
+[`../../branding.json`](../../branding.json) and packaged as `thumbnail.png`. Same layout as upstream's code-drawn
+icon (`../source/pack_cover.py`): title on a dark ground, yellow bar, hazard band, then a packing slip listing the
+bundled mods, running off the edge. Upstream renders it with Windows fonts (Franklin Gothic Heavy, Bahnschrift) that
+are not available elsewhere, so this one is drawn by `thumbnail.py` with the OFL fonts in `fonts/`; it is a close
+recreation, not a pixel match. `python thumbnail.py` regenerates it (deterministic). Upstream's own
+`../thumbnail.png` is left untouched.

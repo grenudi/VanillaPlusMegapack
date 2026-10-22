@@ -2,6 +2,7 @@
   "name": "Make Helldivers Great Again (MHGA)",
   "short_name": "MHGA",
   "artifact_stem": "MHGA",
+  "icon": "assets/mhga/thumbnail.png",
   "previous": [
     {"name": "Vanilla Plus Megapack", "artifact_stem": "Vanilla-Plus-Megapack"}
   ]

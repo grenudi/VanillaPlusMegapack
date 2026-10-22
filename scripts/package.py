@@ -27,7 +27,7 @@ def package_release(root: Path, build: Path, report: dict) -> Path:
     display_name = report['name'] + ' - ' + release_version
     release_stem = stem + '-' + release_version
     files[stem + '-README.txt'] = (root / report.get('install_instructions', 'INSTALL.txt')).read_bytes()
-    thumbnail = root / 'assets/thumbnail.png'
+    thumbnail = root / report.get('icon', 'assets/thumbnail.png')  # the box icon; named thumbnail.png inside the package
     if thumbnail.is_file():
         files['thumbnail.png'] = thumbnail.read_bytes()
     options = [dict(option) for option in report['options']]

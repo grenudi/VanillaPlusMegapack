@@ -12,6 +12,7 @@ The only place the display name lives. Nothing functional is derived from it.
 | `name` | the title in Arsenal / HD2MM, the identity module's `name` field, docs |
 | `short_name` | prose ("the MHGA repository") |
 | `artifact_stem` | file names only: `<stem>-vN.zip`, `<stem>-manifest.json`, `<stem>-README.txt` |
+| `icon` | the box icon shown in the mod manager (a PNG under `assets/`); packaged as `thumbnail.png` |
 | `previous` | earlier brands, so docs that still use them can be rewritten |
 
 Values are validated (`scripts/branding.py`): no quotes, backslashes or control characters in names, and a safe
