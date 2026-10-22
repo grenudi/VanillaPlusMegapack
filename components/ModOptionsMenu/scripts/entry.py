@@ -1,7 +1,7 @@
 """Mod Options Menu's addon entry: src/bingus_text.lua and locales/, then the other source files (Bingus Shared
 Runtime's vendored src/bingus_runtime.lua and src/bingus_memory.lua among them), ahead of src/mod_options_menu.lua,
 as one plaintext Lua resource with the loader's discovery declaration first. Standard library only and no side
-effects on import, so scripts/build.py and the Vanilla Plus Megapack build produce the same bytes."""
+effects on import, so scripts/build.py and the MHGA build produce the same bytes."""
 import re
 from pathlib import Path
 

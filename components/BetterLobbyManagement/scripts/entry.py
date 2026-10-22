@@ -1,6 +1,6 @@
 """Better Lobby Management's addon entry: src/ assembled into one plaintext Lua resource that carries the
 loader's discovery declaration on its first line. Standard library only and no side effects on import, so
-scripts/build.py and the Vanilla Plus Megapack build produce the same bytes from the same sources."""
+scripts/build.py and the MHGA build produce the same bytes from the same sources."""
 from pathlib import Path
 
 NAME = 'mods/cowboybingus/better_lobby_management'
