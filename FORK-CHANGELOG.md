@@ -1,5 +1,24 @@
 # Changelog
 
+## [42.1.0](https://github.com/make-helldivers-great-again/mhga/compare/v42.0.1...v42.1.0) (2026-10-22)
+
+
+### Features
+
+* MHGA box icon, selected by branding.json ([7cf1c2f](https://github.com/make-helldivers-great-again/mhga/commit/7cf1c2fa19f925b8eac82ca8e93148066d80c56b))
+* rebrand to Make Helldivers Great Again (MHGA) ([#8](https://github.com/make-helldivers-great-again/mhga/issues/8)) ([20fb5de](https://github.com/make-helldivers-great-again/mhga/commit/20fb5def50c4efd64b21f1e37a5019154cd37ce1))
+* rename the remaining occurrences of the old name in docs ([9434d07](https://github.com/make-helldivers-great-again/mhga/commit/9434d077b8b2e6dd6b145e4483b5abdb5796cee7))
+
+
+### Bug Fixes
+
+* restore pinned SentryAimRetention source to upstream's exact bytes ([bff54cc](https://github.com/make-helldivers-great-again/mhga/commit/bff54cc5943672efdeb2b6964b36c2adb12b0dca))
+
+
+### CI
+
+* verify all components reproduce upstream's pinned resources ([164e22e](https://github.com/make-helldivers-great-again/mhga/commit/164e22e496fae507c03dec4f024b21f690538202))
+
 ## [42.0.1](https://github.com/grenudi/VanillaPlusMegapack/compare/v42.0.0...v42.0.1) (2026-10-22)
 
 
